@@ -131,7 +131,6 @@
     <ClInclude Include="Particle.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="gravity_differential_equation.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
