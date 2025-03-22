@@ -35,8 +35,8 @@ int main()
 		double d_phi = 2 * PPm::PI / N_k;
 		for (int i = index; i < index + N_k; i++)
 		{
-			particles[i].r.x = r_k * cos(phi);
-			particles[i].r.y = r_k * sin(phi);
+			particles[i].r.x = (r_k+random(r_k-PPm::dr,r_k+PPm::dr)) * cos(phi);
+			particles[i].r.y = (r_k + random(r_k - PPm::dr, r_k + PPm::dr)) * sin(phi);
 			particles[i].r.z = 0;
 			phi += d_phi;
 		}
@@ -59,7 +59,7 @@ int main()
 			}
 		}
 		double v_radial = sqrt(particles[i].r.module() * F_ij.module());
-		particles[i].v.x = v_radial * cos(atan(F_ij.y / F_ij.x)); //? TODO: угол поворота исправить
+		particles[i].v.x = v_radial * cos(atan(F_ij.y / F_ij.x));
 		particles[i].v.y = v_radial * sin(atan(F_ij.y / F_ij.x));
 		particles[i].v.z = 0;
 		particles[i].E += particles[i].m * particles[i].v.module_2() / 2.0;
@@ -85,7 +85,7 @@ int main()
 					// TODO: realize impuls of moment
 					particles[i].v = F(particles[i], particles[j]) * PPm::dt + particles[i].v;
 					particles[i].r = particles[i].r + particles[i].v * PPm::dt;
-					particles[i].E += particles[i].m * particles[i].v.module_2() / 2.0 + PPm::G * particles[i].m * particles[j].m / (particles[j].r - particles[i].r).module();
+					particles[i].E += particles[i].m * particles[i].v.module_2() / 2.0 - PPm::G * particles[i].m * particles[j].m / (particles[j].r - particles[i].r).module();
 					particles[i].P = particles[i].P + particles[i].v * particles[i].m;
 				}
 			}
