@@ -4,6 +4,7 @@
 #include<iostream>
 #include<cmath>
 #include"Particle.h"
+#include <iomanip>
 
 double random(double beg, double end)
 {
@@ -101,13 +102,13 @@ int main()
 			particles[i].P = vec(0, 0, 0);
 		}
 		std::cout << k;
-		std::cout << " E= " << sistem_E[k] << std::endl;
+		std::cout << std::setprecision(10) << " E= " << sistem_E[k] << std::endl;
 		k++;
 	}
 	std::ofstream conversation_laws("C:\\Users\\mesho\\Desktop\\научка_2025_весна\\программная_реализация_Равновесная_Модель\\визуальзация измерений\\measurements.txt");
 	for (int i = 0; i < sistem_E.size(); i++)
 	{
-		conversation_laws<< i <<" "<< sistem_E[i] << " " << sistem_P[i] << " " << sistem_M[i] << std::endl;
+		conversation_laws<< std::setprecision(10) << i <<" "<< sistem_E[i] << " " << sistem_P[i] << " " << sistem_M[i] << std::endl;
 	}
 	//====================================================================================================
 

@@ -2,8 +2,8 @@
 namespace Partcile_Particle_model {
 	//Constants:
 	//======================================================================
-	//const double G = 6.67 * 10e-11;
-	const double G = 1;
+	const double G = 6.67 * 10e-11;
+	//const double G = 1;
 	const double r_c = 0.005*0.005; // в данном случае используется r_c*r_c
 	const double PI = 3.141592653589793238462643383279502884;
 	//initial conditions:
