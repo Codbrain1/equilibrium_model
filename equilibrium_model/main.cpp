@@ -2,6 +2,7 @@
 #include<vector>
 #include<random>
 #include<iostream>
+#include<cmath>
 #include"Particle.h"
 
 double random(double beg, double end)
@@ -14,10 +15,7 @@ double random(double beg, double end)
 int main()
 {
 	namespace PPm = Partcile_Particle_model;
-	double t_0 = 0, t_1 = 100;
-	double dt = 1;
-	unsigned N = 200000;
-	std::vector<PPm::Particle> PP_model(N); //array particals in model
+	std::vector<PPm::Particle> particles(PPm::N); //array particals in model
 	//TODO: add initial conditions for Particals
 	 
 	 
@@ -25,36 +23,89 @@ int main()
 	//setting the initial conditions
 	// 
 	//====================================================================================================
-	
+	double index = 0;
+	double r_k = PPm::r_0+PPm::dr/2.0;
+	int sum = 0;
+	while (r_k <= PPm::R_max)
+	{
+		double sigma_r = PPm::sigma(r_k);
+		int N_k = round(sigma_r * PPm::PI * r_k*PPm::dr * PPm::N);
+		sum += N_k;
+		double phi = 0;
+		double d_phi = 2 * PPm::PI / N_k;
+		for (int i = index; i < index+N_k; i++)
+		{
+			particles[i].r.x = r_k * cos(phi);
+			particles[i].r.y = r_k * sin(phi);
+			particles[i].r.z = 0;
+			phi += d_phi;
+		}
+		r_k += PPm::dr;
+		index += N_k;
+	}
+	std::cout << "\n" << sum << std::endl;
 
+	for (size_t i = 0; i < particles.size(); i++)
+	{
+		vec F_ij;
+		for (size_t j = 0; j < particles.size(); j++)
+		{
+		
+			if (i != j)
+			{
+				// TODO: realize impuls of moment
+				F_ij = F(particles[i], particles[j]) + F_ij;
+				particles[i].E += - PPm::G * particles[i].m * particles[j].m / (particles[j].r - particles[i].r).module();
+			}
+		}
+		double v_radial = sqrt(particles[i].r.module() * F_ij.module());
+		particles[i].v.x = v_radial; //? TODO угол поворота исправить
+		particles[i].v.y = 0;
+		particles[i].v.z = 0;
+		particles[i].E += particles[i].m * particles[i].v.module_2() / 2.0;
+		particles[i].P = particles[i].v * particles[i].m;
+	}
 	
 	// integration of differential equations
 	// 
 	//====================================================================================================
-	std::vector<PPm::Particle> sistem_parametrs(100, PPm::Particle());
-	for (int t = 0; t < 100; t++)
+	int k = 0;
+	std::vector<double> sistem_E((int)(PPm::t_1-PPm::t_0)/PPm::dt, 0);
+	std::vector<double> sistem_P((int)(PPm::t_1 - PPm::t_0) / PPm::dt, 0);
+	std::vector<double> sistem_M((int)(PPm::t_1 - PPm::t_0) / PPm::dt, 0);
+
+	for (double t = PPm::t_0; t < PPm::t_1; t+=PPm::dt)
 	{
-		for (size_t i = 0; i < PP_model.size(); i++)
+		for (size_t i = 0; i < particles.size(); i++)
 		{
-			for (size_t j = 0; j < PP_model.size(); j++)
+			for (size_t j = 0; j < particles.size(); j++)
 			{
 				if (i != j)
 				{
 					// TODO: realize impuls of moment
-					PP_model[i].v = F(PP_model[i], PP_model[j]) * dt + PP_model[i].v;
-					PP_model[i].r = PP_model[i].r + PP_model[i].v * dt;
-					PP_model[i].E += PP_model[i].m * PP_model[i].v.module_2() / 2.0 - PPm::G * PP_model[i].m * PP_model[j].m / (PP_model[j].r - PP_model[i].r).module();
-					PP_model[i].P = PP_model[i].P + PP_model[i].m * PP_model[i].v;
+					particles[i].v = F(particles[i], particles[j]) * PPm::dt + particles[i].v;
+					particles[i].r = particles[i].r + particles[i].v * PPm::dt;
+					particles[i].E += particles[i].m * particles[i].v.module_2() / 2.0 - PPm::G * particles[i].m * particles[j].m / (particles[j].r - particles[i].r).module();
+					particles[i].P = particles[i].P +  particles[i].v*particles[i].m;
 				}
 			}
-			sistem_parametrs[t].E += PP_model[i].E;
-			sistem_parametrs[t].P = sistem_parametrs[t].P + PP_model[i].P;
-			//sistem_parametrs[t].M = sistem_parametrs[t].M + PP_model[i].M;
+
+			sistem_E[k] += particles[i].E;
+			sistem_P[k] = sistem_P[k] + particles[i].P.module();
+			sistem_M[k] = sistem_M[k] + particles[i].M.module();
+			
 		}
+		for (size_t i = 0; i < particles.size(); i++)
+		{
+			particles[i].E = 0; 
+			particles[i].P = vec(0,0,0);
+		}
+		std::cout << k<<std::endl;
+		k++;
 	}
-	for (int t=0;t<100;t++)
+	for (int i=0;i<sistem_E.size();i++)
 	{
-		std::cout << "t" << t << ": E = " << sistem_parametrs[t].E << " P = " <<sistem_parametrs[t].P.module()<< std::endl;
+		std::cout << "t" << i << ": E = " << sistem_E[i] << " P = " <<sistem_P[i]<<" M = "<<sistem_M[i]<<std::endl;
 	}
 	//====================================================================================================
 

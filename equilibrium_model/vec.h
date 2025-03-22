@@ -34,7 +34,7 @@ public:
 	double module_2() const { return x * x + y * y + z * z; }
 	
 };
-vec operator*(const double c, const vec& _vec)
-{
-	return _vec * c;
-}
+//vec operator*(const double c, const vec& _vec)
+//{
+//	return _vec * c;
+//}
