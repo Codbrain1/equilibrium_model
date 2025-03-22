@@ -65,6 +65,7 @@ int main()
 		particles[i].v.z = 0;
 		particles[i].E += particles[i].m * particles[i].v.module_2() / 2.0;
 		particles[i].P = particles[i].v * particles[i].m;
+		particles[i].M = particles[i].r * particles[i].P;
 	}
 
 	// integration of differential equations
@@ -88,6 +89,7 @@ int main()
 					particles[i].r = particles[i].r + particles[i].v * PPm::dt;
 					particles[i].E += particles[i].m * particles[i].v.module_2() / 2.0 - PPm::G * particles[i].m * particles[j].m / (particles[j].r - particles[i].r).module();
 					particles[i].P = particles[i].P + particles[i].v * particles[i].m;
+					particles[i].M = particles[i].M + particles[i].r * particles[i].P;
 				}
 			}
 
@@ -100,9 +102,10 @@ int main()
 		{
 			particles[i].E = 0;
 			particles[i].P = vec(0, 0, 0);
+			particles[i].M = vec(0, 0, 0);
 		}
 		std::cout << k;
-		std::cout << std::setprecision(10) << " E= " << sistem_E[k] << std::endl;
+		std::cout << std::setprecision(10) << " E= " << sistem_E[k] <<" P= "<< sistem_P[k] <<" M= "<< sistem_M[k] << std::endl;
 		k++;
 	}
 	std::ofstream conversation_laws("C:\\Users\\mesho\\Desktop\\научка_2025_весна\\программная_реализация_Равновесная_Модель\\визуальзация измерений\\measurements.txt");
