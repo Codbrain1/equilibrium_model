@@ -100,13 +100,14 @@ int main()
 			particles[i].E = 0;
 			particles[i].P = vec(0, 0, 0);
 		}
-		std::cout << k;
-		std::cout << " E= " << sistem_E[k] << std::endl;
+		std::cout << k<<std::endl;
+		//std::cout << " E= " << sistem_E[k] << std::endl;
 		k++;
 	}
+	std::ofstream conversation_laws("measurements.txt");
 	for (int i = 0; i < sistem_E.size(); i++)
 	{
-		std::cout << "t" << i << ": E = " << sistem_E[i] << " P = " << sistem_P[i] << " M = " << sistem_M[i] << std::endl;
+		conversation_laws<< i <<" "<< sistem_E[i] << " " << sistem_P[i] << " " << sistem_M[i] << std::endl;
 	}
 	//====================================================================================================
 
