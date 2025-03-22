@@ -5,7 +5,7 @@
 #include<cmath>
 #include"Particle.h"
 #include <iomanip>
-
+#include<thread>
 double random(double beg, double end)
 {
 	std::random_device rd;
@@ -13,9 +13,26 @@ double random(double beg, double end)
 	std::uniform_real_distribution<> dist(beg, end);
 	return dist(gen);
 }
+namespace PPm = Partcile_Particle_model;
+void calculating(std::vector<PPm::Particle>& particles, int i, int j_0, int j_1)
+{
+	for (size_t j = j_0; j <j_1; j++)
+	{
+		if (i != j)
+		{
+			// TODO: realize impuls of moment
+			particles[i].v = F(particles[i], particles[j]) * PPm::dt + particles[i].v;
+			particles[i].r = particles[i].r + particles[i].v * PPm::dt;
+			particles[i].E += particles[i].m * particles[i].v.module_2() / 2.0 - PPm::G * particles[i].m * particles[j].m / (particles[j].r - particles[i].r).module();
+			particles[i].P = particles[i].P + particles[i].v * particles[i].m;
+			particles[i].M = particles[i].M + particles[i].r * particles[i].P;
+		}
+	}
+}
 int main()
 {
-	namespace PPm = Partcile_Particle_model;
+
+	
 	std::vector<PPm::Particle> particles(PPm::N); //array particals in model
 	//TODO: add initial conditions for Particals
 
@@ -51,7 +68,7 @@ int main()
 		vec F_ij;
 		for (size_t j = 0; j < particles.size(); j++)
 		{
-
+			
 			if (i != j)
 			{
 				// TODO: realize impuls of moment
@@ -80,19 +97,15 @@ int main()
 	{
 		for (size_t i = 0; i < particles.size(); i++)
 		{
-			for (size_t j = 0; j < particles.size(); j++)
-			{
-				if (i != j)
-				{
-					// TODO: realize impuls of moment
-					particles[i].v = F(particles[i], particles[j]) * PPm::dt + particles[i].v;
-					particles[i].r = particles[i].r + particles[i].v * PPm::dt;
-					particles[i].E += particles[i].m * particles[i].v.module_2() / 2.0 - PPm::G * particles[i].m * particles[j].m / (particles[j].r - particles[i].r).module();
-					particles[i].P = particles[i].P + particles[i].v * particles[i].m;
-					particles[i].M = particles[i].M + particles[i].r * particles[i].P;
-				}
-			}
-
+			
+			/*std::thread th1(calculating,particles,i,0, particles.size()/4);
+			std::thread th2(calculating, particles, i, particles.size() / 4, particles.size() / 2);
+			std::thread th3(calculating, particles, i, particles.size() / 2, particles.size() / 4+ particles.size() / 2);
+			std::thread th4(calculating, particles, i, particles.size() / 4 + particles.size() / 2, particles.size());
+			th1.join();
+			th2.join();
+			th3.join();
+			th4.join();*/
 			sistem_E[k] += particles[i].E;
 			sistem_P[k] = sistem_P[k] + particles[i].P.module();
 			sistem_M[k] = sistem_M[k] + particles[i].M.module();
