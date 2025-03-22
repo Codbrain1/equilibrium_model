@@ -100,8 +100,8 @@ int main()
 			particles[i].E = 0;
 			particles[i].P = vec(0, 0, 0);
 		}
-		std::cout << k<<std::endl;
-		//std::cout << " E= " << sistem_E[k] << std::endl;
+		std::cout << k;
+		std::cout << " E= " << sistem_E[k] << std::endl;
 		k++;
 	}
 	std::ofstream conversation_laws("C:\\Users\\mesho\\Desktop\\научка_2025_весна\\программная_реализация_Равновесная_Модель\\визуальзация измерений\\measurements.txt");

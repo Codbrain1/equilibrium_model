@@ -15,7 +15,7 @@ namespace Partcile_Particle_model {
 	double M = 1;//общая масса частиц
 	double r_0 = 0; //начадбный радиус
 	double dr = R_max/100; //шаг по радиальной компоненте
-	const double r_alpha =0.001;
-	const double sigma_0= N/PI;
+	const double r_alpha =0.025;
+	const double sigma_0=12.5;
 
 }
