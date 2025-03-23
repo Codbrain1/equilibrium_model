@@ -13,7 +13,7 @@ namespace Partcile_Particle_model {
 		// TODO: add function
 		Particle() :r(0, 0, 0), v(0, 0, 0), F(0, 0, 0), a(0, 0, 0), M(0, 0, 0), P(0, 0, 0)
 		{
-			m = 1/N;
+			m = 1.0/N;
 			E = 0;
 		}
 
@@ -31,5 +31,5 @@ namespace Partcile_Particle_model {
 	/// <returns></returns>
 	double sigma(double r) { return sigma_0 *r_alpha* r_alpha /r; }
 
-	double sigma_exp(double r) { return sigma_0 * exp(-r / r_alpha); }
+	//double sigma_exp(double r) { return sigma_0 * exp(-r / r_alpha); }
 }
