@@ -134,6 +134,9 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="vec.h" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\..\визуальзация измерений\measurements.txt" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
