@@ -29,5 +29,7 @@ namespace Partcile_Particle_model {
 	/// </summary>
 	/// <param name="r"></param>
 	/// <returns></returns>
-	double sigma(double r) { return sigma_0 *r_alpha/r; }
+	double sigma(double r) { return sigma_0 *r_alpha* r_alpha /r; }
+
+	double sigma_exp(double r) { return sigma_0 * exp(-r / r_alpha); }
 }

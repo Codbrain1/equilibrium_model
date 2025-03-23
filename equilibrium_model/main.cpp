@@ -29,8 +29,31 @@ void calculating(std::vector<PPm::Particle>& particles,int k,int i_0,int i_1)
 			if (i != j)
 			{
 				// TODO: realize impuls of moment
-				particles[i].v = F(particles[i], particles[j]) * PPm::dt + particles[i].v;
+				particles[i].v = F(particles[i], particles[j]) * PPm::dt*0.5 + particles[i].v;
+			}
+		}
+		
+	}	
+	for (size_t i = i_0; i < i_1; i++)
+	{
+
+		for (size_t j = 0; j < particles.size(); j++)
+		{
+			if (i != j)
+			{
 				particles[i].r = particles[i].r + particles[i].v * PPm::dt;
+			}
+		}
+
+	}
+	for (size_t i = i_0; i < i_1; i++)
+	{
+
+		for (size_t j = 0; j < particles.size(); j++)
+		{
+			if (i != j)
+			{
+				particles[i].v = F(particles[i], particles[j]) * PPm::dt * 0.5 + particles[i].v;
 				particles[i].E += particles[i].m * particles[i].v.module_2() / 2.0 - PPm::G * particles[i].m * particles[j].m / (particles[j].r - particles[i].r).module();
 				particles[i].P = particles[i].P + particles[i].v * particles[i].m;
 				particles[i].M = particles[i].M + particles[i].r * particles[i].P;
@@ -40,6 +63,8 @@ void calculating(std::vector<PPm::Particle>& particles,int k,int i_0,int i_1)
 		sistem_P[k] = sistem_P[k] + particles[i].P.module();
 		sistem_M[k] = sistem_M[k] + particles[i].M.module();
 	}
+	
+	
 }
 int main()
 {
@@ -54,82 +79,87 @@ int main()
 	// 
 	//====================================================================================================
 	double index = 0;
-	double r_k = PPm::r_0 + PPm::dr / 2.0;
+	double r_k = PPm::r_0 + PPm::dr*0.5;
 	int sum = 0;
-	while (r_k <= PPm::R_max)
+	double Summ_sigma_r = 0;
+	while (r_k<= PPm::R_max)
 	{
+
 		double sigma_r = PPm::sigma(r_k);
-		int N_k = round(sigma_r * PPm::PI * r_k * PPm::dr * PPm::N);
+		int N_k = round(sigma_r * PPm::PI *r_k * PPm::dr * PPm::N);
 		sum += N_k;
 		double phi = 0;
 		double d_phi = 2 * PPm::PI / N_k;
+		double ds = PPm::PI * r_k * PPm::dr;
+		Summ_sigma_r += sigma_r*ds;
 		for (int i = index; i < index + N_k; i++)
 		{
-			particles[i].r.x = (r_k + random(r_k - PPm::dr, r_k + PPm::dr)) * cos(phi);
-			particles[i].r.y = (r_k + random(r_k - PPm::dr, r_k + PPm::dr)) * sin(phi);
+			particles[i].r.x = (r_k  + random(-PPm::dr*0.5, PPm::dr*0.5)) * cos(phi);
+			particles[i].r.y = (r_k  + random(-PPm::dr*0.5, PPm::dr*0.5)) * sin(phi);
 			particles[i].r.z = 0;
 			phi += d_phi;
 		}
 		r_k += PPm::dr;
 		index += N_k;
 	}
-	std::cout << "\n" << sum << std::endl;
-
-	for (size_t i = 0; i < particles.size(); i++)
+	std::cout << "\n" << sum <<" "<<Summ_sigma_r << std::endl;
+	if (sum == PPm::N)
 	{
-		vec F_ij;
-		for (size_t j = 0; j < particles.size(); j++)
-		{
-
-			if (i != j)
-			{
-				// TODO: realize impuls of moment
-				F_ij = F(particles[i], particles[j]) + F_ij;
-				particles[i].E -= PPm::G * particles[i].m * particles[j].m / (particles[j].r - particles[i].r).module();
-			}
-		}
-		double v_radial = sqrt(particles[i].r.module() * F_ij.module());
-		particles[i].v.x = v_radial * cos(atan(F_ij.y / F_ij.x));
-		particles[i].v.y = v_radial * sin(atan(F_ij.y / F_ij.x));
-		particles[i].v.z = 0;
-		particles[i].E += particles[i].m * particles[i].v.module_2() / 2.0;
-		particles[i].P = particles[i].v * particles[i].m;
-		particles[i].M = particles[i].r * particles[i].P;
-	}
-
-	// integration of differential equations
-	// 
-	//====================================================================================================
-	int k = 0;
-	
-
-	for (double t = PPm::t_0; t < PPm::t_1; t += PPm::dt)
-	{
-		std::thread th1(calculating, std::ref(particles), k, 0, particles.size() / 4);
-		
-		std::thread th2(calculating, std::ref(particles), k, particles.size() / 4, particles.size() / 2);
-		
-		std::thread th3(calculating, std::ref(particles), k, particles.size() / 2, 3 * particles.size() / 4);
-		std::thread th4(calculating, std::ref(particles), k, 3*particles.size() / 4, particles.size());
-		th1.join();
-		th2.join();
-		th3.join();
-		th4.join();
 		for (size_t i = 0; i < particles.size(); i++)
 		{
-			particles[i].E = 0;
-			particles[i].P = vec(0, 0, 0);
-			particles[i].M = vec(0, 0, 0);
-		}
-		std::cout << k;
-		std::cout << std::setprecision(10) << " E= " << sistem_E[k] << " P= " << sistem_P[k] << " M= " << sistem_M[k] << std::endl;
-		k++;
-	}
-	std::ofstream conversation_laws("C:\\Users\\mesho\\Desktop\\научка_2025_весна\\программная_реализация_Равновесная_Модель\\визуальзация измерений\\measurements.txt");
-	for (int i = 0; i < sistem_E.size(); i++)
-	{
-		conversation_laws << std::setprecision(10) << i << " " << sistem_E[i] << " " << sistem_P[i] << " " << sistem_M[i] << std::endl;
-	}
-	//====================================================================================================
+			vec F_ij;
+			for (size_t j = 0; j < particles.size(); j++)
+			{
 
+				if (i != j)
+				{
+					// TODO: realize impuls of moment
+					F_ij = F(particles[i], particles[j]) + F_ij;
+					particles[i].E -= PPm::G * particles[i].m * particles[j].m / (particles[j].r - particles[i].r).module();
+				}
+			}
+			double v_radial = sqrt(particles[i].r.module() * F_ij.module());
+			particles[i].v.x = v_radial * cos(atan(F_ij.y / F_ij.x));
+			particles[i].v.y = v_radial * sin(atan(F_ij.y / F_ij.x));
+			particles[i].v.z = 0;
+			particles[i].E += particles[i].m * particles[i].v.module_2() / 2.0;
+			particles[i].P = particles[i].v * particles[i].m;
+			particles[i].M = particles[i].r * particles[i].P;
+		}
+
+		// integration of differential equations
+		// 
+		//====================================================================================================
+		int k = 0;
+
+
+		for (double t = PPm::t_0; t < PPm::t_1; t += PPm::dt)
+		{
+			std::thread th1(calculating, std::ref(particles), k, 0, particles.size() / 4);
+
+			std::thread th2(calculating, std::ref(particles), k, particles.size() / 4, particles.size() / 2);
+
+			std::thread th3(calculating, std::ref(particles), k, particles.size() / 2, 3 * particles.size() / 4);
+			std::thread th4(calculating, std::ref(particles), k, 3 * particles.size() / 4, particles.size());
+			th1.join();
+			th2.join();
+			th3.join();
+			th4.join();
+			for (size_t i = 0; i < particles.size(); i++)
+			{
+				particles[i].E = 0;
+				particles[i].P = vec(0, 0, 0);
+				particles[i].M = vec(0, 0, 0);
+			}
+			std::cout << k;
+			std::cout << std::setprecision(10) << " E= " << sistem_E[k] << " P= " << sistem_P[k] << " M= " << sistem_M[k] << std::endl;
+			k++;
+		}
+		std::ofstream conversation_laws("C:\\Users\\mesho\\Desktop\\научка_2025_весна\\программная_реализация_Равновесная_Модель\\визуальзация измерений\\measurements.txt");
+		for (int i = 0; i < sistem_E.size(); i++)
+		{
+			conversation_laws << std::setprecision(10) << i << " " << sistem_E[i] << " " << sistem_P[i] << " " << sistem_M[i] << std::endl;
+		}
+		//====================================================================================================
+	}
 }
