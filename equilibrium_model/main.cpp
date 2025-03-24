@@ -15,10 +15,10 @@ double random(double beg, double end)
 }
 namespace PPm = Partcile_Particle_model;
 
-std::vector<double> sistem_E((int)(PPm::t_1 - PPm::t_0) / PPm::dt + 1, 0);
-std::vector<double> sistem_P((int)(PPm::t_1 - PPm::t_0) / PPm::dt + 1, 0);
-std::vector<double> sistem_M((int)(PPm::t_1 - PPm::t_0) / PPm::dt + 1, 0);
-std::vector<double> sistem_t((int)(PPm::t_1 - PPm::t_0) / PPm::dt + 1, 0);
+std::vector<double> sistem_E;
+std::vector<double> sistem_P;
+std::vector<double> sistem_M;
+std::vector<double> sistem_t;
 
 void calculating(std::vector<PPm::Particle>& particles, int k, int i_0, int i_1)
 {
@@ -113,7 +113,10 @@ int main()
 		index += N_k;
 	}
 	std::cout << "\n" << sum << " " << Summ_sigma_r << std::endl;
-
+	sistem_E.push_back(0);
+	sistem_P.push_back(0);
+	sistem_M.push_back(0);
+	sistem_t.push_back(0);
 	if (sum == PPm::N)
 	{
 
@@ -137,11 +140,11 @@ int main()
 		for (size_t i = 0; i < particles.size(); i++)
 		{
 			double v_radial = sqrt(particles[i].r.module() * particles[i].F.module());
-			double v_asimutal = atan2(particles[i].F.y,particles[i].F.x);
-			particles[i].v.x = v_radial*cos(v_asimutal);
-			particles[i].v.y = v_radial *sin(v_asimutal);
+			double v_asimutal = atan2(particles[i].F.y, particles[i].F.x);
+			particles[i].v.x = v_radial * cos(v_asimutal);
+			particles[i].v.y = v_radial * sin(v_asimutal);
 			particles[i].v.z = 0;
-			particles[i].E += particles[i].m * particles[i].v.module_2() / 2.0;
+			particles[i].E = particles[i].E * 0.5 + particles[i].m * particles[i].v.module_2() * 0.5;
 			particles[i].P = particles[i].v * particles[i].m;
 			particles[i].M = particles[i].r * particles[i].P;
 			sistem_E[0] += particles[i].E;
@@ -160,8 +163,12 @@ int main()
 		{
 			positions << std::setprecision(15) << particles[i].r.x << " " << particles[i].r.y << " " << particles[i].r.z << std::endl;
 		}		int k = 1;
-		for (double t = PPm::t_0; t <= PPm::t_1; t += PPm::dt)
+		for (double t = PPm::t_0+PPm::dt; t <= PPm::t_1; t += PPm::dt)
 		{
+			sistem_E.push_back(0);
+			sistem_P.push_back(0);
+			sistem_M.push_back(0);
+			sistem_t.push_back(t);
 			for (size_t i = 0; i < particles.size(); i++)
 			{
 				particles[i].E = 0;
@@ -185,8 +192,8 @@ int main()
 			{
 				positions << std::setprecision(15) << particles[i].r.x << " " << particles[i].r.y << " " << particles[i].r.z << std::endl;
 			}
-			sistem_t[k] = t+PPm::dt;
 			k++;
+
 		}
 		std::ofstream conversation_laws("C:\\Users\\mesho\\Desktop\\научка_2025_весна\\программная_реализация_Равновесная_Модель\\визуальзация_измерений\\measurements.txt");
 		for (int i = 0; i < sistem_E.size(); i++)
