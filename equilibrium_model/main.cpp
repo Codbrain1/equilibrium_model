@@ -129,7 +129,8 @@ int main()
 				{
 					// TODO: realize impuls of moment
 					particles[i].F = F(particles[i], particles[j]) + particles[i].F;
-					particles[i].E -= PPm::G * particles[i].m * particles[j].m / (particles[j].r - particles[i].r).module();
+					vec r_ij = particles[j].r - particles[i].r;
+					particles[i].E -= PPm::G * particles[i].m * particles[j].m / sqrt(r_ij.module_2() + PPm::r_c);
 				}
 			}
 		}
