@@ -18,6 +18,7 @@ namespace PPm = Partcile_Particle_model;
 std::vector<double> sistem_E((int)(PPm::t_1 - PPm::t_0) / PPm::dt + 1, 0);
 std::vector<double> sistem_P((int)(PPm::t_1 - PPm::t_0) / PPm::dt + 1, 0);
 std::vector<double> sistem_M((int)(PPm::t_1 - PPm::t_0) / PPm::dt + 1, 0);
+std::vector<double> sistem_t((int)(PPm::t_1 - PPm::t_0) / PPm::dt + 1, 0);
 
 void calculating(std::vector<PPm::Particle>& particles, int k, int i_0, int i_1)
 {
@@ -114,6 +115,7 @@ int main()
 
 	if (sum == PPm::N)
 	{
+
 		//setting the initial velocity
 		// 
 		//==========================================================
@@ -133,8 +135,9 @@ int main()
 		for (size_t i = 0; i < particles.size(); i++)
 		{
 			double v_radial = sqrt(particles[i].r.module() * particles[i].F.module());
-			particles[i].v.x = v_radial*cos(atan(particles[i].F.y / particles[i].F.x));
-			particles[i].v.y = v_radial*sin(atan(particles[i].F.y / particles[i].F.x));
+			double v_asimutal = atan2(particles[i].F.y,particles[i].F.x);
+			particles[i].v.x = v_radial*cos(v_asimutal);
+			particles[i].v.y = v_radial *sin(v_asimutal);
 			particles[i].v.z = 0;
 			particles[i].E += particles[i].m * particles[i].v.module_2() / 2.0;
 			particles[i].P = particles[i].v * particles[i].m;
@@ -148,7 +151,13 @@ int main()
 // integration of differential equations
 // 
 //========================================================================================================================
-		int k = 1;
+		std::ofstream positions("C:\\Users\\mesho\\Desktop\\научка_2025_весна\\программная_реализация_Равновесная_Модель\\визуальзация_измерений\\positions.txt");
+		positions << PPm::N << std::endl;
+		positions << 0 << std::endl;
+		for (int i = 0; i < particles.size(); i++)
+		{
+			positions << std::setprecision(15) << particles[i].r.x << " " << particles[i].r.y << " " << particles[i].r.z << std::endl;
+		}		int k = 1;
 		for (double t = PPm::t_0; t <= PPm::t_1; t += PPm::dt)
 		{
 			for (size_t i = 0; i < particles.size(); i++)
@@ -168,13 +177,19 @@ int main()
 			th4.join();
 			
 			std::cout << k;
-			std::cout << std::setprecision(10) << " E= " << sistem_E[k] << " P= " << sistem_P[k] << " M= " << sistem_M[k] << std::endl;
+			std::cout << std::setprecision(15) << " E= " << sistem_E[k] << " P= " << sistem_P[k] << " M= " << sistem_M[k] << std::endl;
+			positions << t << std::endl;
+			for (int i = 0; i < particles.size(); i++)
+			{
+				positions << std::setprecision(15) << particles[i].r.x << " " << particles[i].r.y << " " << particles[i].r.z << std::endl;
+			}
+			sistem_t[k] = t+PPm::dt;
 			k++;
 		}
-		std::ofstream conversation_laws("C:\\Users\\mesho\\Desktop\\научка_2025_весна\\программная_реализация_Равновесная_Модель\\визуальзация измерений\\measurements.txt");
+		std::ofstream conversation_laws("C:\\Users\\mesho\\Desktop\\научка_2025_весна\\программная_реализация_Равновесная_Модель\\визуальзация_измерений\\measurements.txt");
 		for (int i = 0; i < sistem_E.size(); i++)
 		{
-			conversation_laws << std::setprecision(20) << i << " " << sistem_E[i] << " " << sistem_P[i] << " " << sistem_M[i] << std::endl;
+			conversation_laws << std::setprecision(15) << sistem_t[i] << " " << sistem_E[i] << " " << sistem_P[i] << " " << sistem_M[i] << std::endl;
 		}
 //====================================================================================================
 	}

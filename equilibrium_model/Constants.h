@@ -10,11 +10,11 @@ namespace Partcile_Particle_model {
 	//======================================================================
 	const double N = 1000; //число частиц
 	const double t_0 = 0, t_1 = 1; //начальное и конеченое время
-	double dt = 0.001; //шаг времени
+	double dt = 0.01; //шаг времени
 	double R_max = 1;//максимальный радиус
 	double M = 1;//общая масса частиц
 	double r_0 = 0; //начальбный радиус
-	double dr = R_max/100; //шаг по радиальной компоненте
+	double dr = R_max/10; //шаг по радиальной компоненте
 	const double r_alpha =R_max/sqrt(N);
 	const double sigma_0=N/PI;
 
