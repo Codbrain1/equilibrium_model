@@ -22,17 +22,18 @@ std::vector<double> sistem_t((int)(PPm::t_1 - PPm::t_0) / PPm::dt + 1, 0);
 
 void calculating(std::vector<PPm::Particle>& particles, int k, int i_0, int i_1)
 {
-
+	std::vector<vec> u_i(i_1 - i_0, vec(0, 0, 0));
 	for (size_t i = i_0; i < i_1; i++)
 	{
-		particles[i].r = particles[i].r + particles[i].v * PPm::dt + particles[i].F * 0.5 * PPm::dt * PPm::dt;
+		u_i[i - i_0] = particles[i].v;
+		particles[i].v = particles[i].v + particles[i].F * PPm::dt;
+		particles[i].r = particles[i].r + (particles[i].v + u_i[i - i_0]) * PPm::dt * 0.5;
 	}
 
-	std::vector<vec> F_i(i_1 - i_0, vec(0, 0, 0));
-	for (int i = 0; i < F_i.size(); i++)
+
+	for (int i = i_0; i < i_1; i++)
 	{
-		F_i[i] = particles[i + i_0].F;
-		particles[i+i_0].F = vec(0, 0, 0);
+		particles[i].F = vec(0, 0, 0);
 	}
 
 	for (size_t i = i_0; i < i_1; i++)
@@ -48,7 +49,7 @@ void calculating(std::vector<PPm::Particle>& particles, int k, int i_0, int i_1)
 
 	for (size_t i = i_0; i < i_1; i++)
 	{
-		particles[i].v = particles[i].v + (F_i[i - i_0] + particles[i].F) * 0.5 * PPm::dt;
+		particles[i].v = (particles[i].v + u_i[i - i_0]) * 0.5 + particles[i].F * 0.5 * PPm::dt;
 	}
 
 	for (size_t i = i_0; i < i_1; i++)
@@ -57,18 +58,18 @@ void calculating(std::vector<PPm::Particle>& particles, int k, int i_0, int i_1)
 		{
 			if (i != j)
 			{
-				particles[i].E -= PPm::G * particles[i].m * particles[j].m / (particles[j].r - particles[i].r).module();
-				
+				vec r_ij = particles[j].r - particles[i].r;
+				particles[i].E -= PPm::G * particles[i].m * particles[j].m / sqrt(r_ij.module_2() + PPm::r_c);
+
 			}
 		}
-		particles[i].E += particles[i].m * particles[i].v.module_2()*0.5;
+		particles[i].E = particles[i].E * 0.5 + particles[i].m * particles[i].v.module_2() * 0.5;
 		particles[i].P = particles[i].v * particles[i].m;
 		particles[i].M = particles[i].r * particles[i].P;
 		sistem_E[k] += particles[i].E;
 		sistem_P[k] = sistem_P[k] + particles[i].P.module();
 		sistem_M[k] = sistem_M[k] + particles[i].M.module();
 	}
-
 
 }
 int main()
