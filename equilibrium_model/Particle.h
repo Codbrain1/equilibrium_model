@@ -15,6 +15,7 @@ namespace Partcile_Particle_model {
 		{
 			m = 1.0/N;
 			E = 0;
+
 		}
 
 	};
