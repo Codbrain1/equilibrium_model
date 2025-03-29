@@ -89,8 +89,8 @@ int main()
 	particles[0].r.y = 0;
 	particles[0].r.z = 0;
 	particles[0].m = 1;
-	particles[1].r.x = (PPm::R_max) * cos(PPm::PI);
-	particles[1].r.y = (PPm::R_max) * sin(PPm::PI);
+	particles[1].r.x = (PPm::R_max) * cos(0);
+	particles[1].r.y = (PPm::R_max) * sin(0);
 	particles[1].r.z = 0;
 	particles[1].m = 1.0 / 333000.0;
 	sistem_E.push_back(0);
@@ -116,6 +116,9 @@ int main()
 	std::cout <<std::fixed<<std::setprecision(15)<< particles[1].v.module() << std::endl;
 
 	double r_module = (particles[0].r - particles[1].r).module();
+	std::cout << particles[1].v.module_2() << std::endl;
+
+	std::cout << particles[1].m << std::endl;
 
 	std::cout << 0.5 * particles[1].m * particles[1].v.module_2() << std::endl;
 
