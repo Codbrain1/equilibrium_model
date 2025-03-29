@@ -140,10 +140,11 @@ int main()
 		for (size_t i = 0; i < particles.size(); i++)
 		{
 
-			double v_radial = sqrt(particles[i].r.module() * particles[i].F.module());
-			double v_asimutal = atan2(particles[i].F.y, particles[i].F.x);
-			particles[i].v.x = v_radial * cos(v_asimutal);
-			particles[i].v.y = v_radial * sin(v_asimutal);
+			double v_asimutal = sqrt(particles[i].r.module() * particles[i].F.module());
+			double phi = atan2(particles[i].r.y, particles[i].r.x);
+			double r = particles[i].r.module();
+			particles[i].v.x = -r * v_asimutal * sin(phi);
+			particles[i].v.y = r * v_asimutal * cos(phi);
 			particles[i].v.z = 0;
 			particles[i].E = particles[i].E * 0.5 + particles[i].m * particles[i].v.module_2() * 0.5;
 			particles[i].P = particles[i].v * particles[i].m;
