@@ -144,17 +144,6 @@ int main()
 		sistem_M.push_back(0);
 		sistem_t.push_back(t);
 
-		double alpha = PPm::G * particles[0].m * particles[1].m;
-		double eccentricity = sqrt(1 + (particles[1].E * particles[1].M.module_2()) / (particles[1].m * alpha * alpha));
-		double p = particles[1].M.module_2() / (particles[1].m * alpha);
-
-		double _r = p / (1 + eccentricity * cos(_phi));
-
-		particles[1].r.x = _r * cos(_phi);
-		particles[1].r.y = _r * cos(_phi);
-		particles[1].r.z = 0;
-		_phi += dphi;
-
 		for (size_t i = 0; i < particles.size(); i++)
 		{
 			particles[i].E = 0;
@@ -162,7 +151,7 @@ int main()
 			particles[i].M = vec(0, 0, 0);
 		}
 
-		/*std::vector<vec> u_i(particles.size(), vec(0, 0, 0));
+		std::vector<vec> u_i(particles.size(), vec(0, 0, 0));
 		for (size_t i = 1; i < particles.size(); i++)
 		{
 			u_i[i] = particles[i].v;
@@ -190,19 +179,18 @@ int main()
 		for (size_t i = 1; i < particles.size(); i++)
 		{
 			particles[i].v = (particles[i].v + u_i[i]) * 0.5 + particles[i].F * 0.5 * PPm::dt;
-		}*/
+		}
 
-		double r = (particles[0].r - particles[1].r).module();
-		particles[1].E = 0.5 * particles[1].m * particles[1].v.module_2() - 0.5 * (PPm::G * particles[0].m * particles[1].m) / (sqrt(r * r + PPm::r_c));
+		double r = (particles[1].r - particles[0].r).module();
 		particles[1].P = particles[1].v * particles[1].m;
 		particles[1].M = particles[1].r * particles[1].P;
+		particles[1].E = 0.5 * particles[1].m * particles[1].v.module_2() - 0.5 * (PPm::G * particles[0].m * particles[1].m) / (sqrt(r * r + PPm::r_c));
 		sistem_E[k] += particles[1].E;
 		sistem_P[k] = sistem_P[k] + particles[1].P.module();
-		sistem_M[k] = sistem_M[k] + particles[1].M.module();
-
+		sistem_M[k] = sistem_M[k]	+ particles[1].M.module();
 
 		std::cout << k;
-		std::cout << std::setprecision(15) << " E= " << sistem_E[k] << " P= " << sistem_P[k] << " M= " << sistem_M[k] << std::endl;
+		std::cout << std::setprecision(15) << " E= " << sistem_E[k] << " P= " << sistem_P[k] << " M= " << sistem_M[k]<< std::endl;
 		positions << t << std::endl;
 		for (int i = 0; i < particles.size(); i++)
 		{
