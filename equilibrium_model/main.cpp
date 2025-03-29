@@ -178,7 +178,7 @@ int main()
 					if (i != j)
 					{
 						vec r_ij = particles[j].r - particles[i].r;
-						particles[i].E -= PPm::G * particles[i].m * particles[j].m / sqrt(r_ij.module_2() + PPm::r_c);
+						particles[i].E -= 0.5*PPm::G * particles[i].m * particles[j].m / sqrt(r_ij.module_2() + PPm::r_c);
 
 					}
 				}
