@@ -92,7 +92,7 @@ int main()
 	double r_k = PPm::r_0 + PPm::dr * 0.5;
 	int sum = 0;
 	double Summ_sigma_r = 0;
-	while (r_k <= PPm::R_max)
+	/*while (r_k <= PPm::R_max)
 	{
 
 		double sigma_r = PPm::sigma(r_k);
@@ -111,19 +111,30 @@ int main()
 		}
 		r_k += PPm::dr;
 		index += N_k;
-	}
+	}*/
+		
+		particles[0].r.x =0;
+		particles[0].r.y = 0;
+		particles[0].r.z = 0;
+		particles[0].m = 1;
+		particles[1].r.x = (PPm::R_max / 2) * cos(PPm::PI);
+		particles[1].r.y = (PPm::R_max / 2) * sin(PPm::PI);
+		particles[1].r.z = 0;
+		particles[1].m = 1.0/333000.0;
 	std::cout << "\n" << sum << " " << Summ_sigma_r << std::endl;
 	sistem_E.push_back(0);
 	sistem_P.push_back(0);
 	sistem_M.push_back(0);
 	sistem_t.push_back(0);
+	sum = PPm::N;
+
 	if (sum == PPm::N)
 	{
 
 		//setting the initial velocity
 		// 
 		//==========================================================
-		for (size_t i = 0; i < particles.size(); i++)
+		for (size_t i = 1; i < particles.size(); i++)
 		{
 			for (size_t j = 0; j < particles.size(); j++)
 			{
@@ -137,13 +148,14 @@ int main()
 				}
 			}
 		}
-		for (size_t i = 0; i < particles.size(); i++)
+		for (size_t i = 1; i < particles.size(); i++)
 		{
 
-			double v_radial = sqrt(particles[i].r.module() * particles[i].F.module());
-			double v_asimutal = atan2(particles[i].F.y, particles[i].F.x);
-			particles[i].v.x = v_radial * cos(v_asimutal);
-			particles[i].v.y = v_radial * sin(v_asimutal);
+			double v_asimutal = sqrt(particles[i].r.module() * particles[i].F.module());
+			double phi = atan2(particles[i].r.y, particles[i].r.x);
+			double r = particles[i].r.module();
+			particles[i].v.x = -r*v_asimutal*sin(phi);
+			particles[i].v.y = r*v_asimutal*cos(phi);
 			particles[i].v.z = 0;
 			particles[i].E = particles[i].E * 0.5 + particles[i].m * particles[i].v.module_2() * 0.5;
 			particles[i].P = particles[i].v * particles[i].m;
@@ -177,14 +189,15 @@ int main()
 				particles[i].M = vec(0, 0, 0);
 			}
 
-			std::thread th1(calculating, std::ref(particles), k, 0, particles.size() / 4);
-			std::thread th2(calculating, std::ref(particles), k, particles.size() / 4, particles.size() / 2);
+			//std::thread th1(calculating, std::ref(particles), k, 1, particles.size() / 4);
+			std::thread th1(calculating, std::ref(particles), k, 1, particles.size());
+			/*std::thread th2(calculating, std::ref(particles), k, particles.size() / 4, particles.size() / 2);
 			std::thread th3(calculating, std::ref(particles), k, particles.size() / 2, 3 * particles.size() / 4);
-			std::thread th4(calculating, std::ref(particles), k, 3 * particles.size() / 4, particles.size());
+			std::thread th4(calculating, std::ref(particles), k, 3 * particles.size() / 4, particles.size());*/
 			th1.join();
-			th2.join();
+			/*th2.join();
 			th3.join();
-			th4.join();
+			th4.join();*/
 			
 			std::cout << k;
 			std::cout << std::setprecision(15) << " E= " << sistem_E[k] << " P= " << sistem_P[k] << " M= " << sistem_M[k] << std::endl;
