@@ -22,8 +22,9 @@ namespace Partcile_Particle_model {
 
 	vec F(const Particle& particle, const Particle& particle1)
 	{
-		vec r_ij = particle1.r - particle.r;
-		return  r_ij*(G * (particle1.m) / pow((r_ij.module_2() + r_c), 3.0 / 2.0));
+		vec r_ij = particle.r - particle1.r;
+		double r = sqrt(r_ij.module_2() + r_c);
+		return  r_ij*(G * (particle1.m) /(r*r*r));
 	}
 	/// <summary>
 	/// функция вычисляющая поверхностную плотность в тонком диске, определена в полярных координатах
