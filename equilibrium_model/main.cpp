@@ -134,7 +134,7 @@ int main()
 			sistem_P[0] += particles[i].P.module();
 			sistem_M[0] += particles[i].M.module();
 		}
-		std::cout << std::setprecision(20) << " E= " << sistem_E[0] << " P= " << sistem_P[0] << " M= " << sistem_M[0] << std::endl;
+		std::cout << std::setprecision(10) << " E= " << sistem_E[0] << " P= " << sistem_P[0] << " M= " << sistem_M[0] << std::endl;
 
 // integration of differential equations
 // 
@@ -144,7 +144,7 @@ int main()
 		positions << 0 << std::endl;
 		for (int i = 0; i < particles.size(); i++)
 		{
-			positions << std::setprecision(15) << particles[i].r.x << " " << particles[i].r.y << " " << particles[i].r.z << std::endl;
+			positions << std::setprecision(10) << particles[i].r.x << " " << particles[i].r.y << " " << particles[i].r.z << std::endl;
 		}		int k = 1;
 		for (double t = PPm::t_0+PPm::dt; t <= PPm::t_1; t += PPm::dt)
 		{
@@ -177,8 +177,8 @@ int main()
 				{
 					if (i != j)
 					{
-						vec r_ij = particles[i].r - particles[j].r;
-						particles[i].E -= 0.5 * PPm::G * particles[i].m * particles[j].m / sqrt(r_ij.module_2() + PPm::r_c);
+						vec r_ij = particles[j].r - particles[i].r;
+						particles[i].E -= PPm::G * particles[i].m * particles[j].m / sqrt(r_ij.module_2() + PPm::r_c);
 
 					}
 				}
@@ -191,7 +191,7 @@ int main()
 			positions << t << std::endl;
 			for (int i = 0; i < particles.size(); i++)
 			{
-				positions << std::setprecision(15) << particles[i].r.x << " " << particles[i].r.y << " " << particles[i].r.z << std::endl;
+				positions << std::setprecision(10) << particles[i].r.x << " " << particles[i].r.y << " " << particles[i].r.z << std::endl;
 			}
 			k++;
 
@@ -199,7 +199,7 @@ int main()
 		std::ofstream conversation_laws("C:\\Users\\mesho\\Desktop\\научка_2025_весна\\программная_реализация_Равновесная_Модель\\визуальзация_измерений\\measurements.txt");
 		for (int i = 0; i < sistem_E.size(); i++)
 		{
-			conversation_laws << std::setprecision(15) << sistem_t[i] << " " << sistem_E[i] << " " << sistem_P[i] << " " << sistem_M[i] << std::endl;
+			conversation_laws << std::setprecision(10) << sistem_t[i] << " " << sistem_E[i] << " " << sistem_P[i] << " " << sistem_M[i] << std::endl;
 		}
 //====================================================================================================
 	}
