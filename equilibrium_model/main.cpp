@@ -187,7 +187,7 @@ int main()
 				sistem_M[k] = sistem_M[k] + particles[i].M.module();
 			}
 			std::cout << k;
-			std::cout << std::setprecision(15) << " E= " << sistem_E[k] << " P= " << sistem_P[k] << " M= " << sistem_M[k] << std::endl;
+			std::cout << std::setprecision(10) << " E= " << sistem_E[k] << " P= " << sistem_P[k] << " M= " << sistem_M[k] << std::endl;
 			positions << t << std::endl;
 			for (int i = 0; i < particles.size(); i++)
 			{
