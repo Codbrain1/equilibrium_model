@@ -144,7 +144,7 @@ int main()
 		positions << 0 << std::endl;
 		for (int i = 0; i < particles.size(); i++)
 		{
-			positions << std::setprecision(10) << particles[i].r.x << " " << particles[i].r.y << " " << particles[i].r.z << std::endl;
+			positions << std::setprecision(10) << particles[i].r.x << " " << particles[i].r.y << " " << particles[i].r.z << " " << particles[i].v.x << " " << particles[i].v.y << " " << particles[i].v.z << std::endl;
 		}		int k = 1;
 		for (double t = PPm::t_0+PPm::dt; t <= PPm::t_1; t += PPm::dt)
 		{
@@ -191,7 +191,7 @@ int main()
 			positions << t << std::endl;
 			for (int i = 0; i < particles.size(); i++)
 			{
-				positions << std::setprecision(10) << particles[i].r.x << " " << particles[i].r.y << " " << particles[i].r.z << std::endl;
+				positions << std::setprecision(10) << particles[i].r.x << " " << particles[i].r.y << " " << particles[i].r.z << " " << particles[i].v.x << " " << particles[i].v.y << " " << particles[i].v.z << std::endl;
 			}
 			k++;
 
