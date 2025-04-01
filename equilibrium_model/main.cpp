@@ -13,6 +13,7 @@ double random(double beg, double end)
 	std::uniform_real_distribution<> dist(beg, end);
 	return dist(gen);
 }
+
 namespace PPm = Partcile_Particle_model;
 
 std::vector<double> sistem_E;
@@ -113,16 +114,9 @@ int main()
 	particles[1].v.y = r * v_asimutal * cos(phi);									// calculate velocity for litle particle
 	particles[1].v.z = 0;															// (kartesian coordinates)
 
-	std::cout <<std::fixed<<std::setprecision(15)<< particles[1].v.module() << std::endl;
-
 	double r_module = (particles[0].r - particles[1].r).module();
-	std::cout << particles[1].v.module_2() << std::endl;
-
+	
 	std::cout << particles[1].m << std::endl;
-
-	std::cout << 0.5 * particles[1].m * particles[1].v.module_2() << std::endl;
-
-	std::cout << (PPm::G * particles[0].m * particles[1].m) / r_module << std::endl;
 
 	particles[1].E = 0.5 * particles[1].m * particles[1].v.module_2() - (PPm::G * particles[0].m * particles[1].m) / r_module;
 	particles[1].P = particles[1].v * particles[1].m;
@@ -130,7 +124,7 @@ int main()
 	sistem_E[0] += particles[1].E;
 	sistem_P[0] += particles[1].P.module();
 	sistem_M[0] += particles[1].M.module();
-	std::cout << std::setprecision(15) << " E= " << sistem_E[0] << " P= " << sistem_P[0] << " M= " << sistem_M[0] << std::endl;
+	//std::cout << std::setprecision(15) << " E= " << sistem_E[0] << " P= " << sistem_P[0] << " M= " << sistem_M[0] << std::endl;
 	//==========================================================
 
 // integration of differential equations
@@ -199,7 +193,7 @@ int main()
 		sistem_P[k] =particles[1].P.module();
 		sistem_M[k] = particles[1].M.module();
 
-		std::cout <<"v " << particles[1].v.module() << std::endl;
+		/*std::cout <<"v " << particles[1].v.module() << std::endl;
 
 		std::cout << "r " << particles[1].r.module() << std::endl;
 
@@ -208,7 +202,7 @@ int main()
 		std::cout << "E_p " << (PPm::G * particles[0].m * particles[1].m) / r << std::endl;
 
 		std::cout << k;
-		std::cout << std::setprecision(15) << " E= " << sistem_E[k] << " P= " << sistem_P[k] << " M= " << sistem_M[k]<< std::endl;
+		std::cout << std::setprecision(15) << " E= " << sistem_E[k] << " P= " << sistem_P[k] << " M= " << sistem_M[k]<< std::endl;*/
 		positions << t << std::endl;
 		for (int i = 0; i < particles.size(); i++)
 		{
