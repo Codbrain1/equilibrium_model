@@ -74,6 +74,40 @@ void calculating(std::vector<PPm::Particle>& particles, int k, int i_0, int i_1)
 
 }
 
+void calculate_conversation_laws(std::vector<PPm::Particle>& particles, int t, int k, int i_0, int i_1)
+{
+	for (size_t i = i_0; i < i_1; i++)
+	{
+		particles[i].E = 0;
+		particles[i].P = vec(0, 0, 0);
+		particles[i].M = vec(0, 0, 0);
+	}
+
+	for (int i = i_0; i < i_1; i++)
+	{
+		particles[i].E = particles[i].m * particles[i].v.module_2() * 0.5;
+		particles[i].P = particles[i].v * particles[i].m;
+		particles[i].M = particles[i].r * particles[i].P;
+		sistem_E_k[k] += particles[i].m * particles[i].v.module_2() * 0.5;
+		for (int j = 0; j < particles.size(); j++)
+		{
+			if (i != j)
+			{
+				vec r_ij = particles[j].r - particles[i].r;
+				particles[i].E -= 0.5 * PPm::G * particles[i].m * particles[j].m / sqrt(r_ij.module_2() + PPm::r_c);
+				sistem_E_p[k] -= 0.5 * PPm::G * particles[i].m * particles[j].m / sqrt(r_ij.module_2() + PPm::r_c);
+
+			}
+		}
+		sistem_E[k] += particles[i].E;
+		sistem_P[k] = sistem_P[k] + particles[i].P.module();
+		sistem_M[k] = sistem_M[k] + particles[i].M.module();
+	}
+}
+void set_initial_conditions(std::vector<PPm::Particle>& ps)
+{
+
+}
 int main()
 {
 
