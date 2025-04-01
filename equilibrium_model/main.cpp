@@ -20,6 +20,8 @@ std::vector<double> sistem_E;
 std::vector<double> sistem_P;
 std::vector<double> sistem_M;
 std::vector<double> sistem_t;
+std::vector<double> sistem_E_k;
+std::vector<double> sistem_E_p;
 
 void calculating(std::vector<PPm::Particle>& particles, int k, int i_0, int i_1)
 {
