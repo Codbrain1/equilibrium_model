@@ -9,7 +9,7 @@ namespace Partcile_Particle_model {
 	//initial conditions:
 	//======================================================================
 	const double N = 2; //число частиц
-	const double t_0 = 0, t_1 = 20; //начальное и конеченое время
+	const double t_0 = 0, t_1 = 1000; //начальное и конеченое время
 	double dt = 0.001; //шаг времени
 	double R_max = 1;//максимальный радиус
 	double M = 1;//общая масса частиц

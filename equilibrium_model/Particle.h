@@ -23,7 +23,7 @@ namespace Partcile_Particle_model {
 	vec F(const Particle& particle, const Particle& particle1)
 	{
 		vec r_ij = particle1.r - particle.r;
-		double r = sqrt(r_ij.module_2() );
+		double r =r_ij.module();
 		return  r_ij*(G * (particle1.m) / (r*r*r));
 	}
 
