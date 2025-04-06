@@ -104,15 +104,27 @@ void set_initial_conditions(std::vector<PPm::Particle>&ps)
 	ps[1].r.z = 0;
 	ps[1].m = 1.0 / 333000.0;
 
+	ps[2].r.x = (PPm::R_max*0.5)*cos(PPm::PI);
+	ps[2].r.y = (PPm::R_max*0.5)*sin(PPm::PI);
+	ps[2].r.z = 0;
+	ps[2].m = 1.0 / 333000.0;
+
 	//setting the initial velocity
 	// 
 	//==========================================================
 	ps[1].F = F(ps[1], ps[0]) + ps[1].F;									//calculate force for litle particle
+	ps[1].F = F(ps[1], ps[2]) + ps[1].F;
 
-	double v_asimutal = sqrt(ps[1].r.module() * ps[1].F.module()) -0.85 * sqrt(ps[1].r.module() * ps[1].F.module());
-	//double v_asimutal = 0;
+	ps[2].F = F(ps[2], ps[0]) + ps[1].F;									//
+	ps[2].F = F(ps[2], ps[1]) + ps[1].F;									//
+
+	double v_asimutal = sqrt(ps[1].r.module() * ps[1].F.module());
 	double phi = atan2(ps[1].r.y, ps[1].r.x);								// calculate velocity for litle particle
 	double r = ps[1].r.module();											// (cylindrical coordinates)
+
+	double v_asimutal1 = sqrt(ps[2].r.module() * ps[2].F.module());
+	double phi1 = atan2(ps[2].r.y, ps[2].r.x);
+	double r1 = ps[2].r.module();
 
 	//setting the initial velocity
 	// 
@@ -120,6 +132,10 @@ void set_initial_conditions(std::vector<PPm::Particle>&ps)
 	ps[1].v.x = -r * v_asimutal * sin(phi);									//
 	ps[1].v.y = r * v_asimutal * cos(phi);									// calculate velocity for litle particle
 	ps[1].v.z = 0;															// (kartesian coordinates)
+
+	ps[2].v.x = -r1 * v_asimutal1 * sin(phi1);
+	ps[2].v.y = r1 * v_asimutal1 * cos(phi1);
+	ps[2].v.z = 0;
 }
 
 int main()
