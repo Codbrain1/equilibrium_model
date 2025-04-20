@@ -70,6 +70,14 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IncludePath>C:\Users\mesho\AppData\Local\Programs\Python\Python312\include;C:\Users\mesho\AppData\Local\Programs\Python\Python312\Lib\site-packages\pybind11\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\mesho\AppData\Local\Programs\Python\Python312\libs;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>C:\Users\mesho\AppData\Local\Programs\Python\Python312\include;C:\Users\mesho\AppData\Local\Programs\Python\Python312\Lib\site-packages\pybind11\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\mesho\AppData\Local\Programs\Python\Python312\libs;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -108,6 +116,8 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>python312_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <DelayLoadDLLs>%(DelayLoadDLLs)</DelayLoadDLLs>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -129,13 +139,18 @@
   <ItemGroup>
     <ClInclude Include="Constants.h" />
     <ClInclude Include="Particle.h" />
+    <ClInclude Include="wrapper.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="vec.h" />
+    <ClCompile Include="wrapper.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\..\визуальзация измерений\measurements.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="visual.py" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

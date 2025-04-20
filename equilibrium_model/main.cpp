@@ -6,6 +6,8 @@
 #include"Particle.h"
 #include <iomanip>
 #include<thread>
+#include"wrapper.h"
+
 double random(double beg, double end)
 {
 	std::random_device rd;
@@ -99,8 +101,8 @@ void set_initial_conditions(std::vector<PPm::Particle>&ps)
 	ps[0].r.y = 0;
 	ps[0].r.z = 0;
 	ps[0].m = 1;
-	ps[1].r.x = (PPm::R_max*0.8)*cos(0);
-	ps[1].r.y = (PPm::R_max*0.8)*sin(0);
+	ps[1].r.x = (PPm::R_max)*cos(0);
+	ps[1].r.y = (PPm::R_max)*sin(0);
 	ps[1].r.z = 0;
 	ps[1].m = 1.0 / 333000.0;
 
@@ -115,10 +117,6 @@ void set_initial_conditions(std::vector<PPm::Particle>&ps)
 	ps[1].F = F(ps[1], ps[0]) + ps[1].F;									//calculate force for litle particle
 	ps[1].F = F(ps[1], ps[2]) + ps[1].F;
 
-	ps[2].F = F(ps[2], ps[0]) + ps[1].F;									//
-	ps[2].F = F(ps[2], ps[1]) + ps[1].F;									//
-
-	double v_asimutal = sqrt(ps[1].r.module() * ps[1].F.module())+ sqrt(ps[1].r.module() * ps[1].F.module())*0.78;
 	double phi = atan2(ps[1].r.y, ps[1].r.x);								// calculate velocity for litle particle
 	double r = ps[1].r.module();											// (cylindrical coordinates)
 
@@ -183,7 +181,6 @@ int main()
 	for (double t = PPm::t_0 + PPm::dt; t <= PPm::t_1; t += PPm::dt)
 	{
 		
-		calculating(particles, k, 0, particles.size());
 
 		if (b % PPm::div == 0) {
 			sistem_E.push_back(0);
@@ -194,7 +191,6 @@ int main()
 			sistem_E_p.push_back(0);
 			sistem_r.push_back(0);
 			sistem_r[k] = particles[1].r.module();
-			calculate_conversation_laws(particles, sistem_E.size()-1, 0, particles.size());
 			
 		}
 		if (b % PPm::div == 0) {
@@ -216,4 +212,13 @@ int main()
 		conversation_laws <<std::fixed<< std::setprecision(15) << sistem_t[i] << " " << sistem_E[i]-sistem_E[0] << " " << sistem_P[i] << " " << sistem_M[i] -sistem_M[0]<< " " << sistem_E_k[i]<< " " << sistem_E_p[i]<< " " << sistem_r[i]-sistem_r[0]<< std::endl;
 	}
 	//====================================================================================================
+
+	try {
+		PythonWrapper py;
+		py.visual_converation_laws();
+	}
+	catch (const py::error_already_set& e) {
+		std::cerr << "Python error: " << e.what() << std::endl;
+	}
+	
 }
