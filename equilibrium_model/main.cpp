@@ -6,8 +6,6 @@
 #include"Particle.h"
 #include <iomanip>
 #include<thread>
-#include"wrapper.h"
-
 double random(double beg, double end)
 {
 	std::random_device rd;
@@ -117,6 +115,8 @@ void set_initial_conditions(std::vector<PPm::Particle>&ps)
 	ps[1].F = F(ps[1], ps[0]) + ps[1].F;									//calculate force for litle particle
 	ps[1].F = F(ps[1], ps[2]) + ps[1].F;
 
+	double v_asimutal = sqrt(ps[1].r.module() * ps[1].F.module())-0.85*sqrt(ps[1].r.module() * ps[1].F.module());
+	//double v_asimutal = 0;
 	double phi = atan2(ps[1].r.y, ps[1].r.x);								// calculate velocity for litle particle
 	double r = ps[1].r.module();											// (cylindrical coordinates)
 
@@ -212,13 +212,5 @@ int main()
 		conversation_laws <<std::fixed<< std::setprecision(15) << sistem_t[i] << " " << sistem_E[i]-sistem_E[0] << " " << sistem_P[i] << " " << sistem_M[i] -sistem_M[0]<< " " << sistem_E_k[i]<< " " << sistem_E_p[i]<< " " << sistem_r[i]-sistem_r[0]<< std::endl;
 	}
 	//====================================================================================================
-
-	try {
-		PythonWrapper py;
-		py.visual_converation_laws();
-	}
-	catch (const py::error_already_set& e) {
-		std::cerr << "Python error: " << e.what() << std::endl;
-	}
 	
 }

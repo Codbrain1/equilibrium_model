@@ -9,9 +9,9 @@ namespace Partcile_Particle_model {
 	public:
 
 		double m, E;
-		vec r, v, F, a, M, P;
+		vec r, v, F, M, P;
 		// TODO: add function
-		Particle() :r(0, 0, 0), v(0, 0, 0), F(0, 0, 0), a(0, 0, 0), M(0, 0, 0), P(0, 0, 0)
+		Particle() :r(0, 0, 0), v(0, 0, 0), F(0, 0, 0), M(0, 0, 0), P(0, 0, 0)
 		{
 			m = 1.0/N;
 			E = 0;
