@@ -59,9 +59,11 @@ def visual_converation_laws():
     set_scientific_fontsize(ax1, 30)
     ax1.grid(True)
     ax1.legend(loc='lower right', bbox_to_anchor=(1, 0), ncol=1, framealpha=1)
-    plt.subplots_adjust(left=0.2, right=0.9, bottom=0.15, top=0.9)
-    plt.savefig(r"C:\Users\mesho\Desktop\научка_2025_весна\программная_реализация_Равновесная_Модель\визуальзация_измерений\conversation_laws\energy.png")
+    plt.subplots_adjust(left=0.2, right=0.9, bottom=0.15, top=0.9)   
+    output_path = r"C:\Users\mesho\Desktop\научка_2025_весна\программная_реализация_Равновесная_Модель\визуальзация_измерений\conversation_laws\energy.png"
+    plt.savefig(output_path)
     plt.close(fig1)
+    print(f"График сохранен: {output_path}")
     
     # 2. График импульса
     fig2, ax2 = plt.subplots(figsize=(12, 8))
@@ -73,8 +75,10 @@ def visual_converation_laws():
     ax2.grid(True)
     ax2.legend(loc='lower right', bbox_to_anchor=(1, 0), ncol=1, framealpha=1)
     plt.subplots_adjust(left=0.2, right=0.9, bottom=0.15, top=0.9)
-    plt.savefig(r"C:\Users\mesho\Desktop\научка_2025_весна\программная_реализация_Равновесная_Модель\визуальзация_измерений\conversation_laws\impulse.png")
+    output_path = r"C:\Users\mesho\Desktop\научка_2025_весна\программная_реализация_Равновесная_Модель\визуальзация_измерений\conversation_laws\impulse.png"
+    plt.savefig(output_path)
     plt.close(fig2)
+    print(f"График сохранен: {output_path}")
     
     # 3. График момента импульса
     fig3, ax3 = plt.subplots(figsize=(12, 8))
@@ -86,9 +90,11 @@ def visual_converation_laws():
     ax3.grid(True)
     ax3.legend(loc='lower right', bbox_to_anchor=(1, 0), ncol=1, framealpha=1)
     plt.subplots_adjust(left=0.2, right=0.9, bottom=0.15, top=0.9)
-    plt.savefig(r"C:\Users\mesho\Desktop\научка_2025_весна\программная_реализация_Равновесная_Модель\визуальзация_измерений\conversation_laws\moment_impulse.png")
+    output_path = r"C:\Users\mesho\Desktop\научка_2025_весна\программная_реализация_Равновесная_Модель\визуальзация_измерений\conversation_laws\moment_impulse.png"
+    plt.savefig(output_path)
     plt.close(fig3)
-    
+    print(f"График сохранен: {output_path}")
+
     # 4. График кинетической энергии
     fig4, ax4 = plt.subplots(figsize=(12, 8))
     ax4.plot(t, E_k, label="кинетическая энергия")
@@ -99,9 +105,11 @@ def visual_converation_laws():
     ax4.grid(True)
     ax4.legend(loc='lower right', bbox_to_anchor=(1, 0), ncol=1, framealpha=1)
     plt.subplots_adjust(left=0.2, right=0.9, bottom=0.15, top=0.9)
-    plt.savefig(r"C:\Users\mesho\Desktop\научка_2025_весна\программная_реализация_Равновесная_Модель\визуальзация_измерений\conversation_laws\energy_k.png")
+    output_path = r"C:\Users\mesho\Desktop\научка_2025_весна\программная_реализация_Равновесная_Модель\визуальзация_измерений\conversation_laws\energy_k.png"
+    plt.savefig(output_path)
     plt.close(fig4)
-    
+    print(f"График сохранен: {output_path}")
+
     # 5. График потенциальной энергии
     fig5, ax5 = plt.subplots(figsize=(12, 8))
     ax5.plot(t, E_p, label="потенциальная энергия")
@@ -112,9 +120,11 @@ def visual_converation_laws():
     ax5.grid(True)
     ax5.legend(loc='lower right', bbox_to_anchor=(1, 0), ncol=1, framealpha=1)
     plt.subplots_adjust(left=0.25, right=0.9, bottom=0.15, top=0.9)
-    plt.savefig(r"C:\Users\mesho\Desktop\научка_2025_весна\программная_реализация_Равновесная_Модель\визуальзация_измерений\conversation_laws\energy_p.png")
+    output_path = r"C:\Users\mesho\Desktop\научка_2025_весна\программная_реализация_Равновесная_Модель\визуальзация_измерений\conversation_laws\energy_p.png"
+    plt.savefig(output_path)
     plt.close(fig5)
-    
+    print(f"График сохранен: {output_path}")
+
     # 6. График расстояния
     fig6, ax6 = plt.subplots(figsize=(12, 8))
     ax6.plot(t, R, label="расстояние от Солнца до Земли")
@@ -125,8 +135,10 @@ def visual_converation_laws():
     ax6.grid(True)
     ax6.legend(loc='lower right', bbox_to_anchor=(1, 0), ncol=1, framealpha=1)
     plt.subplots_adjust(left=0.2, right=0.9, bottom=0.15, top=0.9)
-    plt.savefig(r"C:\Users\mesho\Desktop\научка_2025_весна\программная_реализация_Равновесная_Модель\визуальзация_измерений\conversation_laws\radius_vector.png")
+    output_path = r"C:\Users\mesho\Desktop\научка_2025_весна\программная_реализация_Равновесная_Модель\визуальзация_измерений\conversation_laws\radius_vector.png"
+    plt.savefig(output_path)
     plt.close(fig6)
+    print(f"График сохранен: {output_path}")
 
 def visual_traectories():
     # Чтение данных из файла
@@ -191,7 +203,3 @@ def visual_traectories():
     plt.savefig(output_path)
     plt.close(fig)
     print(f"График сохранен: {output_path}")
-
-if __name__ == "__main__":
-    visual_converation_laws()
-    visual_traectories()

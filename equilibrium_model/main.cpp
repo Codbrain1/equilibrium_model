@@ -6,6 +6,7 @@
 #include"Particle.h"
 #include <iomanip>
 #include<thread>
+#include"wrapper.h"
 double random(double beg, double end)
 {
 	std::random_device rd;
@@ -212,5 +213,9 @@ int main()
 		conversation_laws <<std::fixed<< std::setprecision(15) << sistem_t[i] << " " << sistem_E[i]-sistem_E[0] << " " << sistem_P[i] << " " << sistem_M[i] -sistem_M[0]<< " " << sistem_E_k[i]<< " " << sistem_E_p[i]<< " " << sistem_r[i]-sistem_r[0]<< std::endl;
 	}
 	//====================================================================================================
-	
+	PythonWrapper py;
+	py.vcl();
+	py.vt();
+
+
 }
