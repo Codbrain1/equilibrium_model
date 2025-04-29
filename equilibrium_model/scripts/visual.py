@@ -6,7 +6,7 @@ def set_scientific_fontsize(ax, fontsize=30):
     ax.yaxis.get_offset_text().set_fontsize(fontsize)
     ax.xaxis.get_offset_text().set_fontsize(fontsize)
 
-def visual_converation_laws():
+def visual_conversation_laws():
     E = []
     P = []
     M = []

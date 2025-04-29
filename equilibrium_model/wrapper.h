@@ -30,7 +30,7 @@ public:
 	void vcl()
 	{
 		try {
-			python_module.attr("visual_converation_laws")();
+			python_module.attr("visual_conversation_laws")();
 		}
 		catch (const pyth::error_already_set& e) {
 			throw std::runtime_error("Ошибка загрузки функции: " + std::string(e.what()));

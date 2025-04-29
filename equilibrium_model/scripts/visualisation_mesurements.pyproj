@@ -5,7 +5,8 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{98d1778e-8e71-4730-b9a3-6aaea0c420a3}</ProjectGuid>
     <ProjectHome />
-    <StartupFile>visual.py</StartupFile>
+    <StartupFile>
+    </StartupFile>
     <SearchPath />
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>

@@ -39,7 +39,6 @@
     </Text>
   </ItemGroup>
   <ItemGroup>
-    <None Include="scripts\visual.py" />
     <None Include="ClassDiagram.cd" />
   </ItemGroup>
 </Project>

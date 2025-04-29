@@ -23,7 +23,6 @@ std::vector<double> sistem_M;
 std::vector<double> sistem_t;
 std::vector<double> sistem_E_k;
 std::vector<double> sistem_E_p;
-//std::vector<double> sistem_r;
 
 void KDK(std::vector<PPm::Particle>& particles, int k, int i_0, int i_1)
 {
@@ -219,60 +218,31 @@ void set_initial_conditions(std::vector<PPm::Particle>& ps)
 		ps[i].r.z = 0;
 		ps[i].m = M / N;
 		temp_phi++;
-	}
-	/*temp_phi = 1;
-	for (int i = N / 4; i < N/2; i++)
-	{
-		ps[i].r.x = 0.9*R_max * cos((2 * PI * temp_phi) / (N/4));
-		ps[i].r.y = 0.9* R_max * sin((2 * PI * temp_phi) / (N/4));
-		ps[i].r.z = 0;
-		ps[i].m = M / N;
-		temp_phi++;
-	}*/
-	/*temp_phi = 1;
-	for (int i = N / 2; i < 3*N/4; i++)
-	{
-		ps[i].r.x = 0.8 * R_max * cos((2 * PI * temp_phi) / (N / 4));
-		ps[i].r.y = 0.8 * R_max * sin((2 * PI * temp_phi) / (N / 4));
-		ps[i].r.z = 0;
-		ps[i].m = M / N;
-		temp_phi++;
-	}
-
-	temp_phi = 1;
-	for (int i = 3*N / 4; i < N; i++)
-	{
-		ps[i].r.x = 0.7 * R_max * cos((2 * PI * temp_phi) / (N / 4));
-		ps[i].r.y = 0.7 * R_max * sin((2 * PI * temp_phi) / (N / 4));
-		ps[i].r.z = 0;
-		ps[i].m = M / N;
-		temp_phi++;
-	}
-	*/
-	//setting the initial velocity
-	// 
-	//==========================================================
-	ps[1].F = F(ps[1], ps[0]) + ps[1].F;									//calculate force for litle particle
-
-	double v_asimutal = sqrt(ps[1].r.module() * ps[1].F.module())-0.85*sqrt(ps[1].r.module() * ps[1].F.module());
-	//double v_asimutal = 0;
-	double phi = atan2(ps[1].r.y, ps[1].r.x);								// calculate velocity for litle particle
-	double r = ps[1].r.module();											// (cylindrical coordinates)
+	}									
 
 	//setting the initial velocity
 	// 
 	//==========================================================
-	ps[1].v.x = -r * v_asimutal * sin(phi);									//
-	ps[1].v.y = r * v_asimutal * cos(phi);									// calculate velocity for litle particle
-	ps[1].v.z = 0;															// (kartesian coordinates)
+	for (auto& i : ps) {
+
+		double v_asimutal = sqrt(i.r.module() * i.F.module());		// (cylindrical coordinates)
+		double phi = atan2(i.r.y, i.r.x);
+		double r = i.r.module();
+
+		i.r.x = -r * v_asimutal * sin(phi);		// (kartesian coordinates)
+		i.r.y = r * v_asimutal * cos(phi);			
+		i.r.z = 0;
+	}
 }
 
 int main()
 {
 	std::vector<PPm::Particle> particles(PPm::N); //array particals in model
+
+
 	//setting the initial conditions
 	// 
-	//====================================================================================================
+	//==========================================================
 	set_initial_conditions(particles);
 
 	std::cout << "set initial conditions\n";
@@ -283,9 +253,11 @@ int main()
 	sistem_t.push_back(0);
 	sistem_E_k.push_back(0);
 	sistem_E_p.push_back(0);
+
 	calculate_conversation_laws(particles, 0, 0, particles.size());
 	std::cout << "set intitial conversation laws\n";
 	//==========================================================
+
 
 // integration of differential equations
 // 
@@ -295,10 +267,11 @@ int main()
 
 	std::ofstream positions("C:\\Users\\mesho\\Desktop\\научка_2025_весна\\программная_реализация_Равновесная_Модель\\визуальзация_измерений\\positions.txt");
 	positions << PPm::N << std::endl;
-	positions << 0 << std::endl;
-	for (int i = 0; i < particles.size(); i++)
+	positions << PPm::t_0 << std::endl;
+
+	for (auto & p:particles)
 	{
-		positions << std::setprecision(10) << particles[i].r.x << " " << particles[i].r.y << " " << particles[i].r.z << " " << particles[i].v.x << " " << particles[i].v.y << " " << particles[i].v.z << std::endl;
+		positions << std::setprecision(10) << p.r.x << " " << p.r.y << " " << p.r.z << " " << p.v.x << " " << p.v.y << " " << p.v.z << std::endl;
 	}
 
 	int k = 1;
@@ -308,7 +281,7 @@ int main()
 	for (double t = PPm::t_0 + PPm::dt; t <= PPm::t_1; t += PPm::dt)
 	{
 		
-		calculating(particles, k, 1, particles.size());
+		KDK(particles, k, 1, particles.size());
 
 		if (b % PPm::div == 0) {
 			sistem_E.push_back(0);
@@ -317,16 +290,14 @@ int main()
 			sistem_t.push_back(t);
 			sistem_E_k.push_back(0);
 			sistem_E_p.push_back(0);
-			sistem_r.push_back(0);
-			sistem_r[k] = particles[1].r.module();
 			calculate_conversation_laws(particles, sistem_E.size()-1, 1, particles.size());
 			
 		}
 		if (b % PPm::div == 0) {
 			positions << t << std::endl;
-			for (int i = 0; i < particles.size(); i++)
+			for (auto &p:particles)
 			{
-				positions << std::setprecision(10) << particles[i].r.x << " " << particles[i].r.y << " " << particles[i].r.z << " " << particles[i].v.x << " " << particles[i].v.y << " " << particles[i].v.z << std::endl;
+				positions << std::setprecision(10) << p.r.x << " " << p.r.y << " " << p.r.z << " " << p.v.x << " " << p.v.y << " " << p.v.z << std::endl;
 			}
 			k++;
 		}
