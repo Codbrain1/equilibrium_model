@@ -13,7 +13,7 @@ def visual_converation_laws():
     t = []
     E_k = []
     E_p = []
-    R = []
+    #R = []
     
     with open(r"C:\Users\mesho\Desktop\научка_2025_весна\программная_реализация_Равновесная_Модель\визуальзация_измерений\measurements.txt", 'r') as stream:
         while True:
@@ -22,7 +22,7 @@ def visual_converation_laws():
                 break
                 
             parts = line.strip().split()
-            if len(parts) != 7:
+            if len(parts) != 6:
                 continue
                 
             time = float(parts[0])
@@ -31,7 +31,7 @@ def visual_converation_laws():
             _M = float(parts[3])
             _E_k = float(parts[4])
             _E_p = float(parts[5])
-            _R = float(parts[6])
+            #_R = float(parts[6])
             
             E.append(_E)
             P.append(_P)
@@ -39,7 +39,7 @@ def visual_converation_laws():
             t.append(time)
             E_k.append(_E_k)
             E_p.append(_E_p)
-            R.append(_R)
+            #R.append(_R)
     
     # Настройка стиля для всех графиков
     plt.rcParams.update({
@@ -62,9 +62,10 @@ def visual_converation_laws():
     plt.subplots_adjust(left=0.2, right=0.9, bottom=0.15, top=0.9)   
     output_path = r"C:\Users\mesho\Desktop\научка_2025_весна\программная_реализация_Равновесная_Модель\визуальзация_измерений\conversation_laws\energy.png"
     plt.savefig(output_path)
+    plt.show()
     plt.close(fig1)
     print(f"График сохранен: {output_path}")
-    
+
     # 2. График импульса
     fig2, ax2 = plt.subplots(figsize=(12, 8))
     ax2.plot(t, P, label="импульс")
@@ -88,10 +89,11 @@ def visual_converation_laws():
     ax3.ticklabel_format(axis='y', style='sci', scilimits=(0,0))
     set_scientific_fontsize(ax3, 30)
     ax3.grid(True)
-    ax3.legend(loc='lower right', bbox_to_anchor=(1, 0), ncol=1, framealpha=1)
+    ax3.legend(loc='upper right', bbox_to_anchor=(1, 1), ncol=1, framealpha=1)
     plt.subplots_adjust(left=0.2, right=0.9, bottom=0.15, top=0.9)
     output_path = r"C:\Users\mesho\Desktop\научка_2025_весна\программная_реализация_Равновесная_Модель\визуальзация_измерений\conversation_laws\moment_impulse.png"
     plt.savefig(output_path)
+    plt.show()
     plt.close(fig3)
     print(f"График сохранен: {output_path}")
 
@@ -126,20 +128,93 @@ def visual_converation_laws():
     print(f"График сохранен: {output_path}")
 
     # 6. График расстояния
-    fig6, ax6 = plt.subplots(figsize=(12, 8))
-    ax6.plot(t, R, label="расстояние от Солнца до Земли")
-    ax6.set_xlabel("t", fontsize=30)
-    ax6.set_ylabel("r", fontsize=30)
-    ax6.ticklabel_format(axis='y', style='sci', scilimits=(0,0))
-    set_scientific_fontsize(ax6, 30)
-    ax6.grid(True)
-    ax6.legend(loc='lower right', bbox_to_anchor=(1, 0), ncol=1, framealpha=1)
-    plt.subplots_adjust(left=0.2, right=0.9, bottom=0.15, top=0.9)
-    output_path = r"C:\Users\mesho\Desktop\научка_2025_весна\программная_реализация_Равновесная_Модель\визуальзация_измерений\conversation_laws\radius_vector.png"
-    plt.savefig(output_path)
-    plt.close(fig6)
-    print(f"График сохранен: {output_path}")
-
+    # fig6, ax6 = plt.subplots(figsize=(12, 8))
+    # ax6.plot(t, R, label="расстояние от Солнца до Земли")
+    # ax6.set_xlabel("t", fontsize=30)
+    # ax6.set_ylabel("r", fontsize=30)
+    # ax6.ticklabel_format(axis='y', style='sci', scilimits=(0,0))
+    # set_scientific_fontsize(ax6, 30)
+    # ax6.grid(True)
+    # ax6.legend(loc='lower right', bbox_to_anchor=(1, 0), ncol=1, framealpha=1)
+    # plt.subplots_adjust(left=0.2, right=0.9, bottom=0.15, top=0.9)
+    # output_path = r"C:\Users\mesho\Desktop\научка_2025_весна\программная_реализация_Равновесная_Модель\визуальзация_измерений\conversation_laws\radius_vector.png"
+    # plt.savefig(output_path)
+    # plt.close(fig6)
+    # print(f"График сохранен: {output_path}")
+def print_to_cadrs():
+    count=0
+    # Чтение данных из файла
+    with open(r"C:\Users\mesho\Desktop\научка_2025_весна\программная_реализация_Равновесная_Модель\визуальзация_измерений\positions.txt", 'r') as stream:
+        N = int(stream.readline())
+        time = []
+        X = [[] for _ in range(N)]
+        Y = [[] for _ in range(N)]
+        X1 = [0]
+        Y1 = [0]
+        
+        while True:
+            line = stream.readline()
+            if not line:
+                break
+            t = float(line.strip())
+            time.append(t)
+            
+            for i in range(N):
+                parts = stream.readline().strip().split()
+                if len(parts) != 6:
+                    raise ValueError(f"Ожидалось 6 значений для объекта {i}, получено {len(parts)}")
+                
+                x = float(parts[0])
+                y = float(parts[1])
+                X[i].append(x)
+                Y[i].append(y)
+                
+            div=100
+            
+            if count%div==0:
+                # Построение графика
+                fig, ax = plt.subplots(figsize=(12, 10))
+                plt.axis('equal')
+                #ax.set_aspect('equal', adjustable='box')
+                # Настройки шрифтов
+                plt.rcParams.update({
+                    'axes.labelsize': 30,
+                    'xtick.labelsize': 30,
+                    'ytick.labelsize': 30,
+                })
+                
+                
+          
+                
+                # Начальная точка (золотая)
+                #ax.scatter(X1, Y1, s=100, c='gold', linewidths=5)
+    
+                # Траектории
+                for i in range(N):
+                    ax.plot(X[i], Y[i], linewidth=1)
+    
+                # Конечные точки (зеленые)
+                for i in range(0, N):
+                    if X[i] and Y[i]:
+                        ax.scatter([X[i][-1]], [Y[i][-1]], s=100, c='green', linewidths=5)
+                
+                # ax.set_xlim(-5, 5)  
+                # ax.set_ylim(-5, 5)
+                fig.suptitle(str(time[-1]))        
+                # Настройка научной нотации
+                ax.ticklabel_format(axis='both', style='sci', scilimits=(0,0))
+                set_scientific_fontsize(ax, 30)
+                
+                ax.set_xlabel("x", fontsize=30)
+                ax.set_ylabel("y", fontsize=30)
+                ax.grid(True)
+                plt.subplots_adjust(left=0.2, right=0.9, bottom=0.15, top=0.9)
+                output_path = r"C:\Users\mesho\Desktop\научка_2025_весна\программная_реализация_Равновесная_Модель\визуальзация_измерений\conversation_laws\traectories"+str(count)+".png"
+                plt.savefig(output_path)
+                plt.close(fig)
+                #print(f"График сохранен: {output_path}")
+            count+=1
+            
 def visual_traectories():
     # Чтение данных из файла
     with open(r"C:\Users\mesho\Desktop\научка_2025_весна\программная_реализация_Равновесная_Модель\визуальзация_измерений\positions.txt", 'r') as stream:
@@ -166,40 +241,47 @@ def visual_traectories():
                 y = float(parts[1])
                 X[i].append(x)
                 Y[i].append(y)
+                
+
+        # Построение графика
+        fig, ax = plt.subplots(figsize=(12, 10))
+        plt.axis('equal')
+        # Настройки шрифтов
+        plt.rcParams.update({
+            'axes.labelsize': 30,
+            'xtick.labelsize': 30,
+            'ytick.labelsize': 30,
+        })
+
+            # Начальная точка (золотая)
+            #ax.scatter(X1, Y1, s=100, c='gold', linewidths=5)
     
-    # Построение графика
-    fig, ax = plt.subplots(figsize=(12, 10))
-    plt.axis('equal')
+        # Траектории
+        for i in range(N):
+            ax.plot(X[i], Y[i], linewidth=1)
     
-    # Настройки шрифтов
-    plt.rcParams.update({
-        'axes.labelsize': 30,
-        'xtick.labelsize': 30,
-        'ytick.labelsize': 30,
-    })
-    
-    # Начальная точка (золотая)
-    ax.scatter(X1, Y1, s=100, c='gold', linewidths=5)
-    
-    # Траектории
-    for i in range(N):
-        ax.plot(X[i], Y[i], linewidth=1)
-    
-    # Конечные точки (зеленые)
-    for i in range(1, N):
-        if X[i] and Y[i]:
-            ax.scatter([X[i][-1]], [Y[i][-1]], s=100, c='green', linewidths=5)
-    
-    # Настройка научной нотации
-    ax.ticklabel_format(axis='both', style='sci', scilimits=(0,0))
-    set_scientific_fontsize(ax, 30)
-    
-    ax.set_xlabel("x", fontsize=30)
-    ax.set_ylabel("y", fontsize=30)
-    ax.grid(True)
-    
-    plt.subplots_adjust(left=0.2, right=0.9, bottom=0.15, top=0.9)
-    output_path = r"C:\Users\mesho\Desktop\научка_2025_весна\программная_реализация_Равновесная_Модель\визуальзация_измерений\conversation_laws\traectories1.png"
-    plt.savefig(output_path)
-    plt.close(fig)
-    print(f"График сохранен: {output_path}")
+        # Конечные точки (зеленые)
+        for i in range(0, N):
+            if X[i] and Y[i]:
+                ax.scatter([X[i][-1]], [Y[i][-1]], s=100, c='green', linewidths=5)
+                
+        # ax.set_xlim(-5, 5)  
+        # ax.set_ylim(-5, 5)
+        fig.suptitle(str(time[-1]))        
+        # Настройка научной нотации
+        ax.ticklabel_format(axis='both', style='sci', scilimits=(0,0))
+        set_scientific_fontsize(ax, 30)
+                
+        ax.set_xlabel("x", fontsize=30)
+        ax.set_ylabel("y", fontsize=30)
+        ax.grid(True)
+        plt.subplots_adjust(left=0.2, right=0.9, bottom=0.15, top=0.9)
+        output_path = r"C:\Users\mesho\Desktop\научка_2025_весна\программная_реализация_Равновесная_Модель\визуальзация_измерений\conversation_laws\traectories.png"
+        plt.savefig(output_path)
+        plt.close(fig)
+        print(f"График сохранен: {output_path}")
+
+if __name__ == "__main__":
+    #visual_converation_laws()
+    #visual_traectories()
+    print_to_cadrs()

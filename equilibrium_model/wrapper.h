@@ -45,5 +45,14 @@ public:
 			throw std::runtime_error("Ошибка загрузки функции:" + std::string(e.what()));
 		}
 	}
+	void ptc()
+	{
+		try {
+			python_module.attr("print_to_cadrs")();
+		}
+		catch (const pyth::error_already_set& e) {
+			throw std::runtime_error("Ошибка загрузки функции:" + std::string(e.what()));
+		}
+	}
 
 };

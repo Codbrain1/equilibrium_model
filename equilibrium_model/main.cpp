@@ -23,9 +23,9 @@ std::vector<double> sistem_M;
 std::vector<double> sistem_t;
 std::vector<double> sistem_E_k;
 std::vector<double> sistem_E_p;
-std::vector<double> sistem_r;
+//std::vector<double> sistem_r;
 
-void calculating(std::vector<PPm::Particle>& particles, int k, int i_0, int i_1)
+void KDK(std::vector<PPm::Particle>& particles, int k, int i_0, int i_1)
 {
 	std::vector<vec> u_i(i_1 - i_0, vec(0, 0, 0));
 	for (size_t i = i_0; i < i_1; i++)
@@ -55,6 +55,116 @@ void calculating(std::vector<PPm::Particle>& particles, int k, int i_0, int i_1)
 	for (size_t i = i_0; i < i_1; i++)
 	{
 		particles[i].v = (particles[i].v + u_i[i - i_0]) * 0.5 + particles[i].F * 0.5 * PPm::dt;
+	}
+}
+// Рунге-Кутта 4 порядка
+void RungeKutta4(std::vector<PPm::Particle>& particles, int k, int i_0, int i_1) {
+	std::vector<vec> k1(PPm::N), k2(PPm::N), k3(PPm::N), k4(PPm::N);
+	std::vector<vec> k1v(PPm::N), k2v(PPm::N), k3v(PPm::N), k4v(PPm::N);
+	// Шаг 1
+	for (int i = i_0; i < i_1; i++)
+	{
+		particles[i].F = vec(0, 0, 0);
+	}
+
+	for (size_t i = i_0; i < i_1; i++)
+	{
+		for (size_t j = 0; j < particles.size(); j++)
+		{
+			if (i != j)
+			{
+				particles[i].F = particles[i].F + PPm::F(particles[i], particles[j]);
+			}
+		}
+	}
+
+	for (size_t i = i_0; i < i_1; ++i) {
+		k1v[i] = particles[i].F * PPm::dt;
+		k1[i] = particles[i].v * PPm::dt;
+	}
+
+	// Шаг 2
+	for (size_t i = i_0; i < i_1; i++) {
+		k2[i] = particles[i].r + k1[i] * 0.5;
+		k2v[i] = particles[i].v + k1v[i] * 0.5;
+	}
+	for (int i = i_0; i < i_1; i++)
+	{
+		particles[i].F = vec(0, 0, 0);
+	}
+
+	for (size_t i = i_0; i < i_1; i++)
+	{
+		for (size_t j = 0; j < particles.size(); j++)
+		{
+			if (i != j)
+			{
+				particles[i].F = particles[i].F + PPm::F(particles[i], particles[j]);
+			}
+		}
+	}
+
+	for (size_t i = 0; i < i_1; i++) {
+		k2v[i] = particles[i].F * PPm::dt;
+		k2[i] = (particles[i].v + k1[i] * 0.5) * PPm::dt;
+	}
+
+	// Шаг 3
+	for (size_t i = 0; i < i_1; ++i) {
+		k3[i] = particles[i].r + k2[i] * 0.5;
+		k3v[i] = particles[i].v + k2[i] * 0.5;
+	}
+	for (int i = i_0; i < i_1; i++)
+	{
+		particles[i].F = vec(0, 0, 0);
+	}
+
+	for (size_t i = i_0; i < i_1; i++)
+	{
+		for (size_t j = 0; j < particles.size(); j++)
+		{
+			if (i != j)
+			{
+				particles[i].F = particles[i].F + PPm::F(particles[i], particles[j]);
+			}
+		}
+	}
+
+	for (size_t i = i_0; i < PPm::N; ++i) {
+		k3v[i] = particles[i].F * PPm::dt;
+		k3[i] = (particles[i].v + k2v[i] * 0.5) * PPm::dt;
+	}
+
+	// Шаг 4
+	for (size_t i = i_0; i < i_1; i++) {
+		k4[i] = particles[i].r + k3[i];
+		k4v[i] = particles[i].v + k3v[i];
+	}
+	for (int i = i_0; i < i_1; i++)
+	{
+		particles[i].F = vec(0, 0, 0);
+	}
+
+	for (size_t i = i_0; i < i_1; i++)
+	{
+		for (size_t j = 0; j < particles.size(); j++)
+		{
+			if (i != j)
+			{
+				particles[i].F = particles[i].F + PPm::F(particles[i], particles[j]);
+			}
+		}
+	}
+
+	for (size_t i = i_0; i < i_1; i++) {
+		k4v[i] = particles[i].F * PPm::dt;
+		k4[i] = (particles[i].v + k3v[i]) * PPm::dt;
+	}
+
+
+	for (size_t i = i_0; i < i_1; i++) {
+		particles[i].r = particles[i].r + (k1[i] + k2[i] * 2 + k3[i] * 2 + k4[i]) / 6.0;
+		particles[i].v = particles[i].v + (k1v[i] + k2v[i] * 2 + k3v[i] * 2 + k4v[i]) / 6.0;
 	}
 }
 
@@ -91,39 +201,63 @@ void calculate_conversation_laws(std::vector<PPm::Particle>& particles, int k, i
 	}
 }
 
-void set_initial_conditions(std::vector<PPm::Particle>&ps)
+double set_dinamic_step(std::vector<PPm::Particle>& ps)
 {
+	return 0;
+}
+void set_initial_conditions(std::vector<PPm::Particle>& ps)
+{
+	using namespace Partcile_Particle_model;
 	//setting the initial position
 		// 
 		//====================================================
-	ps[0].r.x = 0;
-	ps[0].r.y = 0;
-	ps[0].r.z = 0;
-	ps[0].m = 1;
-	ps[1].r.x = (PPm::R_max)*cos(0);
-	ps[1].r.y = (PPm::R_max)*sin(0);
-	ps[1].r.z = 0;
-	ps[1].m = 1.0 / 333000.0;
+	int temp_phi = 1;
+	for (int i = 0; i < N; i++)
+	{
+		ps[i].r.x = R_max * cos((2 * PI * temp_phi) / (N));
+		ps[i].r.y = R_max * sin((2 * PI * temp_phi) / (N));
+		ps[i].r.z = 0;
+		ps[i].m = M / N;
+		temp_phi++;
+	}
+	/*temp_phi = 1;
+	for (int i = N / 4; i < N/2; i++)
+	{
+		ps[i].r.x = 0.9*R_max * cos((2 * PI * temp_phi) / (N/4));
+		ps[i].r.y = 0.9* R_max * sin((2 * PI * temp_phi) / (N/4));
+		ps[i].r.z = 0;
+		ps[i].m = M / N;
+		temp_phi++;
+	}*/
+	/*temp_phi = 1;
+	for (int i = N / 2; i < 3*N/4; i++)
+	{
+		ps[i].r.x = 0.8 * R_max * cos((2 * PI * temp_phi) / (N / 4));
+		ps[i].r.y = 0.8 * R_max * sin((2 * PI * temp_phi) / (N / 4));
+		ps[i].r.z = 0;
+		ps[i].m = M / N;
+		temp_phi++;
+	}
 
-	ps[2].r.x = (PPm::R_max*0.7)*cos(PPm::PI);
-	ps[2].r.y = (PPm::R_max*0.7)*sin(PPm::PI);
-	ps[2].r.z = 0;
-	ps[2].m = 1.0 / 333000.0;
-
+	temp_phi = 1;
+	for (int i = 3*N / 4; i < N; i++)
+	{
+		ps[i].r.x = 0.7 * R_max * cos((2 * PI * temp_phi) / (N / 4));
+		ps[i].r.y = 0.7 * R_max * sin((2 * PI * temp_phi) / (N / 4));
+		ps[i].r.z = 0;
+		ps[i].m = M / N;
+		temp_phi++;
+	}
+	*/
 	//setting the initial velocity
 	// 
 	//==========================================================
 	ps[1].F = F(ps[1], ps[0]) + ps[1].F;									//calculate force for litle particle
-	ps[1].F = F(ps[1], ps[2]) + ps[1].F;
 
 	double v_asimutal = sqrt(ps[1].r.module() * ps[1].F.module())-0.85*sqrt(ps[1].r.module() * ps[1].F.module());
 	//double v_asimutal = 0;
 	double phi = atan2(ps[1].r.y, ps[1].r.x);								// calculate velocity for litle particle
 	double r = ps[1].r.module();											// (cylindrical coordinates)
-
-	double v_asimutal1 = sqrt(ps[2].r.module() * ps[2].F.module());
-	double phi1 = atan2(ps[2].r.y, ps[2].r.x);
-	double r1 = ps[2].r.module();
 
 	//setting the initial velocity
 	// 
@@ -131,16 +265,10 @@ void set_initial_conditions(std::vector<PPm::Particle>&ps)
 	ps[1].v.x = -r * v_asimutal * sin(phi);									//
 	ps[1].v.y = r * v_asimutal * cos(phi);									// calculate velocity for litle particle
 	ps[1].v.z = 0;															// (kartesian coordinates)
-
-	ps[2].v.x = -r1 * v_asimutal1 * sin(phi1);
-	ps[2].v.y = r1 * v_asimutal1 * cos(phi1);
-	ps[2].v.z = 0;
 }
 
 int main()
 {
-
-
 	std::vector<PPm::Particle> particles(PPm::N); //array particals in model
 	//setting the initial conditions
 	// 
@@ -148,23 +276,21 @@ int main()
 	set_initial_conditions(particles);
 
 	std::cout << "set initial conditions\n";
-	
+
 	sistem_E.push_back(0);
 	sistem_P.push_back(0);
 	sistem_M.push_back(0);
 	sistem_t.push_back(0);
 	sistem_E_k.push_back(0);
 	sistem_E_p.push_back(0);
-	sistem_r.push_back(0);
-	sistem_r[0] = particles[1].r.module();
-	calculate_conversation_laws(particles, 0, 1, particles.size());
+	calculate_conversation_laws(particles, 0, 0, particles.size());
 	std::cout << "set intitial conversation laws\n";
 	//==========================================================
 
 // integration of differential equations
 // 
 //========================================================================================================================
-	
+
 	std::cout << "write into file\n";
 
 	std::ofstream positions("C:\\Users\\mesho\\Desktop\\научка_2025_весна\\программная_реализация_Равновесная_Модель\\визуальзация_измерений\\positions.txt");
@@ -182,6 +308,7 @@ int main()
 	for (double t = PPm::t_0 + PPm::dt; t <= PPm::t_1; t += PPm::dt)
 	{
 		
+		calculating(particles, k, 1, particles.size());
 
 		if (b % PPm::div == 0) {
 			sistem_E.push_back(0);
@@ -192,6 +319,7 @@ int main()
 			sistem_E_p.push_back(0);
 			sistem_r.push_back(0);
 			sistem_r[k] = particles[1].r.module();
+			calculate_conversation_laws(particles, sistem_E.size()-1, 1, particles.size());
 			
 		}
 		if (b % PPm::div == 0) {
@@ -210,12 +338,12 @@ int main()
 	std::ofstream conversation_laws("C:\\Users\\mesho\\Desktop\\научка_2025_весна\\программная_реализация_Равновесная_Модель\\визуальзация_измерений\\measurements.txt");
 	for (int i = 0; i < sistem_E.size(); i++)
 	{
-		conversation_laws <<std::fixed<< std::setprecision(15) << sistem_t[i] << " " << sistem_E[i]-sistem_E[0] << " " << sistem_P[i] << " " << sistem_M[i] -sistem_M[0]<< " " << sistem_E_k[i]<< " " << sistem_E_p[i]<< " " << sistem_r[i]-sistem_r[0]<< std::endl;
+		conversation_laws << std::fixed << std::setprecision(15) << sistem_t[i] << " " << sistem_E[i]  << " " << sistem_P[i] << " " << sistem_M[i] << " " << sistem_E_k[i] << " " << sistem_E_p[i] << " " << std::endl;
 	}
 	//====================================================================================================
 	PythonWrapper py;
 	py.vcl();
 	py.vt();
-
-
+	//py.ptc();
+	
 }
