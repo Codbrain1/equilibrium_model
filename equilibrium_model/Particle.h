@@ -1,9 +1,8 @@
 #pragma once
 #include"Constants.h"
 #include"vec.h"
-
 namespace Partcile_Particle_model {
-
+	
 	struct Particle
 	{
 	public:
@@ -13,7 +12,7 @@ namespace Partcile_Particle_model {
 		// TODO: add function
 		Particle() :r(0, 0, 0), v(0, 0, 0), F(0, 0, 0), M(0, 0, 0), P(0, 0, 0)
 		{
-			m = 1.0/N;
+			m = Partcile_Particle_model::M/N;
 			E = 0;
 
 		}

@@ -184,8 +184,6 @@ def print_to_cadrs():
                 })
                 
                 
-          
-                
                 # Начальная точка (золотая)
                 #ax.scatter(X1, Y1, s=100, c='gold', linewidths=5)
     
@@ -282,6 +280,6 @@ def visual_traectories():
         print(f"График сохранен: {output_path}")
 
 if __name__ == "__main__":
-    #visual_converation_laws()
+    visual_conversation_laws()
     #visual_traectories()
-    print_to_cadrs()
+    #print_to_cadrs()

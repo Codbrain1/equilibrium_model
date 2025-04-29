@@ -24,10 +24,28 @@ std::vector<double> sistem_t;
 std::vector<double> sistem_E_k;
 std::vector<double> sistem_E_p;
 
+void calc_forces(std::vector<PPm::Particle>& ps,int i_0,int i_1)
+{
+	for (int i = i_0; i < i_1; i++)
+	{
+		ps[i].F = vec(0, 0, 0);
+	}
+
+	for (int i = i_0; i < i_1; i++)
+	{
+		for (int j = 0; j < ps.size(); j++)
+		{
+			if (i != j)
+			{
+				ps[i].F = ps[i].F + PPm::F(ps[i], ps[j]);
+			}
+		}
+	}
+}
 void KDK(std::vector<PPm::Particle>& particles, int k, int i_0, int i_1)
 {
 	std::vector<vec> u_i(i_1 - i_0, vec(0, 0, 0));
-	for (size_t i = i_0; i < i_1; i++)
+	for (int i = i_0; i < i_1; i++)
 	{
 		u_i[i - i_0] = particles[i].v;
 		particles[i].v = particles[i].v + particles[i].F * PPm::dt;
@@ -35,23 +53,9 @@ void KDK(std::vector<PPm::Particle>& particles, int k, int i_0, int i_1)
 	}
 
 
+	calc_forces(particles, i_0, i_1);
+
 	for (int i = i_0; i < i_1; i++)
-	{
-		particles[i].F = vec(0, 0, 0);
-	}
-
-	for (size_t i = i_0; i < i_1; i++)
-	{
-		for (size_t j = 0; j < particles.size(); j++)
-		{
-			if (i != j)
-			{
-				particles[i].F = particles[i].F + PPm::F(particles[i], particles[j]);
-			}
-		}
-	}
-
-	for (size_t i = i_0; i < i_1; i++)
 	{
 		particles[i].v = (particles[i].v + u_i[i - i_0]) * 0.5 + particles[i].F * 0.5 * PPm::dt;
 	}
@@ -219,7 +223,7 @@ void set_initial_conditions(std::vector<PPm::Particle>& ps)
 		ps[i].m = M / N;
 		temp_phi++;
 	}									
-
+	calc_forces(ps, 0, ps.size());
 	//setting the initial velocity
 	// 
 	//==========================================================
@@ -229,9 +233,9 @@ void set_initial_conditions(std::vector<PPm::Particle>& ps)
 		double phi = atan2(i.r.y, i.r.x);
 		double r = i.r.module();
 
-		i.r.x = -r * v_asimutal * sin(phi);		// (kartesian coordinates)
-		i.r.y = r * v_asimutal * cos(phi);			
-		i.r.z = 0;
+		i.v.x = -r * v_asimutal * sin(phi);		// (kartesian coordinates)
+		i.v.y = r * v_asimutal * cos(phi);			
+		i.v.z = 0;
 	}
 }
 
@@ -281,7 +285,7 @@ int main()
 	for (double t = PPm::t_0 + PPm::dt; t <= PPm::t_1; t += PPm::dt)
 	{
 		
-		KDK(particles, k, 1, particles.size());
+		KDK(particles, k, 0, particles.size());
 
 		if (b % PPm::div == 0) {
 			sistem_E.push_back(0);
@@ -290,10 +294,8 @@ int main()
 			sistem_t.push_back(t);
 			sistem_E_k.push_back(0);
 			sistem_E_p.push_back(0);
-			calculate_conversation_laws(particles, sistem_E.size()-1, 1, particles.size());
-			
-		}
-		if (b % PPm::div == 0) {
+			calculate_conversation_laws(particles, sistem_E.size()-1, 0, particles.size());
+
 			positions << t << std::endl;
 			for (auto &p:particles)
 			{
