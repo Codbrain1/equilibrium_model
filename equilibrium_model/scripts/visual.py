@@ -45,8 +45,8 @@ def visual_conversation_laws():
     plt.rcParams.update({
         'axes.titlesize': 30,
         'axes.labelsize': 30,
-        'xtick.labelsize': 30,
-        'ytick.labelsize': 30,
+        'xtick.labelsize': 15,
+        'ytick.labelsize': 15,
         'legend.fontsize': 25
     })
     
@@ -55,8 +55,7 @@ def visual_conversation_laws():
     ax1.plot(t, E, label="полная энергия")
     ax1.set_xlabel("t", fontsize=30)
     ax1.set_ylabel("E", fontsize=30)
-    ax1.ticklabel_format(axis='y', style='sci', scilimits=(0,0))
-    set_scientific_fontsize(ax1, 30)
+    ax1.ticklabel_format(axis='y', style='plain', scilimits=(0,0))
     ax1.grid(True)
     ax1.legend(loc='lower right', bbox_to_anchor=(1, 0), ncol=1, framealpha=1)
     plt.subplots_adjust(left=0.2, right=0.9, bottom=0.15, top=0.9)   
@@ -71,8 +70,7 @@ def visual_conversation_laws():
     ax2.plot(t, P, label="импульс")
     ax2.set_xlabel("t", fontsize=30)
     ax2.set_ylabel("P", fontsize=30)
-    ax2.ticklabel_format(axis='y', style='sci', scilimits=(0,0))
-    set_scientific_fontsize(ax2, 30)
+    ax2.ticklabel_format(axis='y', style='plain', scilimits=(0,0))
     ax2.grid(True)
     ax2.legend(loc='lower right', bbox_to_anchor=(1, 0), ncol=1, framealpha=1)
     plt.subplots_adjust(left=0.2, right=0.9, bottom=0.15, top=0.9)
@@ -86,8 +84,7 @@ def visual_conversation_laws():
     ax3.plot(t, M, label="момент импульса")
     ax3.set_xlabel("t", fontsize=30)
     ax3.set_ylabel("M", fontsize=30)
-    ax3.ticklabel_format(axis='y', style='sci', scilimits=(0,0))
-    set_scientific_fontsize(ax3, 30)
+    ax3.ticklabel_format(axis='y', style='plain', scilimits=(0,0))
     ax3.grid(True)
     ax3.legend(loc='upper right', bbox_to_anchor=(1, 1), ncol=1, framealpha=1)
     plt.subplots_adjust(left=0.2, right=0.9, bottom=0.15, top=0.9)
@@ -102,8 +99,7 @@ def visual_conversation_laws():
     ax4.plot(t, E_k, label="кинетическая энергия")
     ax4.set_xlabel("t", fontsize=30)
     ax4.set_ylabel("$E_k$", fontsize=30)
-    ax4.ticklabel_format(axis='y', style='sci', scilimits=(0,0))
-    set_scientific_fontsize(ax4, 30)
+    ax4.ticklabel_format(axis='y', style='plain', scilimits=(0,0))
     ax4.grid(True)
     ax4.legend(loc='lower right', bbox_to_anchor=(1, 0), ncol=1, framealpha=1)
     plt.subplots_adjust(left=0.2, right=0.9, bottom=0.15, top=0.9)
@@ -117,8 +113,8 @@ def visual_conversation_laws():
     ax5.plot(t, E_p, label="потенциальная энергия")
     ax5.set_xlabel("t", fontsize=30)
     ax5.set_ylabel("$E_p$", fontsize=30)
-    ax5.ticklabel_format(axis='y', style='sci', scilimits=(0,0))
-    set_scientific_fontsize(ax5, 30)
+    ax5.ticklabel_format(axis='y', style='plain', scilimits=(0,0))
+  
     ax5.grid(True)
     ax5.legend(loc='lower right', bbox_to_anchor=(1, 0), ncol=1, framealpha=1)
     plt.subplots_adjust(left=0.25, right=0.9, bottom=0.15, top=0.9)

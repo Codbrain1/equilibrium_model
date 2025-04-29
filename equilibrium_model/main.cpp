@@ -33,11 +33,12 @@ void calc_forces(std::vector<PPm::Particle>& ps,int i_0,int i_1)
 
 	for (int i = i_0; i < i_1; i++)
 	{
-		for (int j = 0; j < ps.size(); j++)
+		for (int j = i+1; j < ps.size(); j++)
 		{
 			if (i != j)
 			{
 				ps[i].F = ps[i].F + PPm::F(ps[i], ps[j]);
+				ps[j].F = ps[i].F * (-1) + ps[j].F;
 			}
 		}
 	}
@@ -60,6 +61,7 @@ void KDK(std::vector<PPm::Particle>& particles, int k, int i_0, int i_1)
 		particles[i].v = (particles[i].v + u_i[i - i_0]) * 0.5 + particles[i].F * 0.5 * PPm::dt;
 	}
 }
+
 // Рунге-Кутта 4 порядка
 void RungeKutta4(std::vector<PPm::Particle>& particles, int k, int i_0, int i_1) {
 	std::vector<vec> k1(PPm::N), k2(PPm::N), k3(PPm::N), k4(PPm::N);
@@ -182,20 +184,19 @@ void calculate_conversation_laws(std::vector<PPm::Particle>& particles, int k, i
 
 	for (int i = i_0; i < i_1; i++)
 	{
-		particles[i].E = particles[i].m * particles[i].v.module_2() * 0.5;	// set kinetical energy
+		particles[i].E = 0.5*particles[i].m * particles[i].v.module_2();	// set kinetical energy
 		particles[i].P = particles[i].v * particles[i].m;					// set impulse
 		particles[i].M = particles[i].r * particles[i].P;					// set moment impulse
 
 		sistem_E_k[k] += particles[i].m * particles[i].v.module_2() * 0.5;
 
-		for (int j = 0; j < particles.size(); j++)
+		for (int j = i; j < particles.size(); j++)
 		{
 			if (i != j)
 			{
 				vec r_ij = particles[j].r - particles[i].r;
 				particles[i].E -= PPm::G * particles[i].m * particles[j].m / r_ij.module();	//set potential energy
 				sistem_E_p[k] -= PPm::G * particles[i].m * particles[j].m / r_ij.module();
-
 			}
 		}
 		sistem_E[k] += particles[i].E;
@@ -238,7 +239,81 @@ void set_initial_conditions(std::vector<PPm::Particle>& ps)
 		i.v.z = 0;
 	}
 }
+void diagnostic(std::vector<PPm::Particle>& particles)
+{
+	// 1. Вывод позиций и скоростей
+	std::cout << "\nКоординаты и скорости частиц:\n";
+	std::cout << std::setprecision(15);
+	for (int i = 0; i < PPm::N; i++) {
+		std::cout << "Частица " << i + 1 << ":\n";
+		std::cout << "  Позиция: (" << particles[i].r.x << ", "
+			<< particles[i].r.y << ", " << particles[i].r.z << ")\n";
+		std::cout << "  Скорость: (" << particles[i].v.x << ", "
+			<< particles[i].v.y << ", " << particles[i].v.z << ")\n";
+		std::cout << "  Модуль скорости: " << particles[i].v.module() << "\n";
+	}
 
+	// 2. Вывод масс
+	std::cout << "\nМассы частиц:\n";
+	for (int i = 0; i < PPm::N; i++) {
+		std::cout << "m" << i + 1 << " = " << particles[i].m << "\n";
+	}
+
+	// 3. Проверка сил
+	std::cout << "\nСилы, действующие на частицы:\n";
+	calc_forces(particles, 0, particles.size());
+	for (int i = 0; i < PPm::N; i++) {
+		std::cout << "F" << i + 1 << " = (" << particles[i].F.x << ", "
+			<< particles[i].F.y << ", " << particles[i].F.z << ")\n";
+		std::cout << "  |F| = " << particles[i].F.module() << "\n";
+	}
+
+	// 4. Детальный расчет энергии
+	std::cout << "\nДетальный расчет энергии:\n";
+	double total_K = 0, total_U = 0;
+
+	// Кинетическая энергия
+	std::cout << "Кинетическая энергия:\n";
+	for (int i = 0; i < PPm::N; i++) {
+		double K_i = 0.5 * particles[i].m * particles[i].v.module_2();
+		std::cout << "  K" << i + 1 << " = " << K_i << "\n";
+		total_K += K_i;
+	}
+	std::cout << "  Суммарная K = " << total_K << "\n";
+
+	// Потенциальная энергия
+	std::cout << "\nПотенциальная энергия (попарно):\n";
+	for (int i = 0; i < PPm::N; i++) {
+		for (int j = i + 1; j < PPm::N; j++) {
+			vec r_ij = particles[j].r - particles[i].r;
+			double dist = r_ij.module();
+			double U_ij = -PPm::G * particles[i].m * particles[j].m / dist;
+			std::cout << "  U" << i + 1 << j + 1 << " = " << U_ij
+				<< " (r_" << i + 1 << j + 1 << " = " << dist << ")\n";
+			total_U += U_ij;
+		}
+	}
+	std::cout << "  Суммарная U = " << total_U << "\n";
+
+	// Полная энергия
+	double total_E = total_K + total_U;
+	std::cout << "\nПолная энергия системы: E = K + U = "
+		<< total_K << " + " << total_U << " = " << total_E << "\n";
+
+	// 5. Проверка сохранения момента импульса
+	std::cout << "\nМомент импульса:\n";
+	vec total_L(0, 0, 0);
+	for (int i = 0; i < PPm::N; i++) {
+		vec L_i = particles[i].r * (particles[i].v * particles[i].m);
+		std::cout << "  L" << i + 1 << " = (" << L_i.x << ", "
+			<< L_i.y << ", " << L_i.z << ")\n";
+		total_L = total_L + L_i;
+	}
+	std::cout << "  Суммарный L = (" << total_L.x << ", "
+		<< total_L.y << ", " << total_L.z << ")\n";
+
+	std::cout << "\n=== Проверка завершена ===\n\n";
+}
 int main()
 {
 	std::vector<PPm::Particle> particles(PPm::N); //array particals in model
@@ -248,6 +323,12 @@ int main()
 	// 
 	//==========================================================
 	set_initial_conditions(particles);
+
+	// ===== ДИАГНОСТИКА НАЧАЛЬНЫХ УСЛОВИЙ =====
+	std::cout << "\n=== Детальная проверка начальных условий ===\n";
+
+	
+	// ===== КОНЕЦ ДИАГНОСТИКИ =====
 
 	std::cout << "set initial conditions\n";
 
@@ -275,7 +356,7 @@ int main()
 
 	for (auto & p:particles)
 	{
-		positions << std::setprecision(10) << p.r.x << " " << p.r.y << " " << p.r.z << " " << p.v.x << " " << p.v.y << " " << p.v.z << std::endl;
+		positions << std::setprecision(13) << p.r.x << " " << p.r.y << " " << p.r.z << " " << p.v.x << " " << p.v.y << " " << p.v.z << std::endl;
 	}
 
 	int k = 1;
@@ -299,7 +380,7 @@ int main()
 			positions << t << std::endl;
 			for (auto &p:particles)
 			{
-				positions << std::setprecision(10) << p.r.x << " " << p.r.y << " " << p.r.z << " " << p.v.x << " " << p.v.y << " " << p.v.z << std::endl;
+				positions << std::setprecision(13) << p.r.x << " " << p.r.y << " " << p.r.z << " " << p.v.x << " " << p.v.y << " " << p.v.z << std::endl;
 			}
 			k++;
 		}
@@ -311,7 +392,7 @@ int main()
 	std::ofstream conversation_laws("C:\\Users\\mesho\\Desktop\\научка_2025_весна\\программная_реализация_Равновесная_Модель\\визуальзация_измерений\\measurements.txt");
 	for (int i = 0; i < sistem_E.size(); i++)
 	{
-		conversation_laws << std::fixed << std::setprecision(15) << sistem_t[i] << " " << sistem_E[i]  << " " << sistem_P[i] << " " << sistem_M[i] << " " << sistem_E_k[i] << " " << sistem_E_p[i] << " " << std::endl;
+		conversation_laws << std::fixed << std::setprecision(13) << sistem_t[i] << " " << sistem_E[i]  << " " << sistem_P[i] << " " << sistem_M[i] << " " << sistem_E_k[i] << " " << sistem_E_p[i] << " " << std::endl;
 	}
 	//====================================================================================================
 	PythonWrapper py;

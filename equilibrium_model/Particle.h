@@ -25,7 +25,6 @@ namespace Partcile_Particle_model {
 		double r =r_ij.module();
 		return  r_ij*(G * (particle1.m) / (r*r*r));
 	}
-
 	/// <summary>
 	/// функция вычисляющая поверхностную плотность в тонком диске, определена в полярных координатах
 	/// </summary>
