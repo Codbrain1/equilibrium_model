@@ -55,7 +55,7 @@ def visual_conversation_laws():
     ax1.plot(t, E, label="полная энергия")
     ax1.set_xlabel("t", fontsize=30)
     ax1.set_ylabel("E", fontsize=30)
-    ax1.ticklabel_format(axis='y', style='plain', scilimits=(0,0))
+    ax1.ticklabel_format(axis='y', style='sci', scilimits=(0,0))
     ax1.grid(True)
     ax1.legend(loc='lower right', bbox_to_anchor=(1, 0), ncol=1, framealpha=1)
     plt.subplots_adjust(left=0.2, right=0.9, bottom=0.15, top=0.9)   
@@ -90,7 +90,7 @@ def visual_conversation_laws():
     plt.subplots_adjust(left=0.2, right=0.9, bottom=0.15, top=0.9)
     output_path = r"C:\Users\mesho\Desktop\научка_2025_весна\программная_реализация_Равновесная_Модель\визуальзация_измерений\conversation_laws\moment_impulse.png"
     plt.savefig(output_path)
-    plt.show()
+    #plt.show()
     plt.close(fig3)
     print(f"График сохранен: {output_path}")
 
