@@ -26,6 +26,10 @@ public:
 	{
 		return vec(x - temp.x, y - temp.y, z - temp.z);
 	}
+	vec operator/(const double temp) const
+	{
+		return vec(x / temp, y / temp, z / temp);
+	}
 	vec operator*(const vec& temp)const		//vector product
 	{
 		return vec(y * temp.z - z * temp.y, z * temp.x - x * temp.z, x * temp.y - y * temp.x);
