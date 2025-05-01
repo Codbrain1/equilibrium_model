@@ -45,8 +45,8 @@ def visual_conversation_laws():
     plt.rcParams.update({
         'axes.titlesize': 30,
         'axes.labelsize': 30,
-        'xtick.labelsize': 15,
-        'ytick.labelsize': 15,
+        'xtick.labelsize': 10,
+        'ytick.labelsize': 10,
         'legend.fontsize': 25
     })
     
@@ -55,7 +55,7 @@ def visual_conversation_laws():
     ax1.plot(t, E, label="полная энергия")
     ax1.set_xlabel("t", fontsize=30)
     ax1.set_ylabel("E", fontsize=30)
-    ax1.ticklabel_format(axis='y', style='plain', scilimits=(0,0))
+    ax1.ticklabel_format(axis='y', style='sci', scilimits=(0,0))
     ax1.grid(True)
     ax1.legend(loc='lower right', bbox_to_anchor=(1, 0), ncol=1, framealpha=1)
     plt.subplots_adjust(left=0.2, right=0.9, bottom=0.15, top=0.9)   
@@ -276,6 +276,6 @@ def visual_traectories():
         print(f"График сохранен: {output_path}")
 
 if __name__ == "__main__":
-    visual_conversation_laws()
+    #visual_conversation_laws()
     #visual_traectories()
-    #print_to_cadrs()
+    print_to_cadrs()
