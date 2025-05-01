@@ -169,7 +169,7 @@ void calculate_conversation_laws(std::vector<PPm::Particle>& particles, int k, i
 			if (i != j)
 			{
 				vec r_ij = particles[j].r - particles[i].r;
-				double r = sqrt(r_ij.module_2() + PPm::r_c);
+				double r = r_ij.module();
 				particles[i].E -= PPm::G * particles[i].m * particles[j].m / r;	//set potential energy
 				sistem_E_p[k] -= PPm::G * particles[i].m * particles[j].m / r;
 			}
@@ -320,10 +320,6 @@ int main()
 	// 
 	//==========================================================
 	set_initial_conditions(particles);
-
-
-
-
 
 	std::cout << "set initial conditions\n";
 
