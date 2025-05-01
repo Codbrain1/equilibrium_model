@@ -45,8 +45,8 @@ def visual_conversation_laws():
     plt.rcParams.update({
         'axes.titlesize': 30,
         'axes.labelsize': 30,
-        'xtick.labelsize': 10,
-        'ytick.labelsize': 10,
+        'xtick.labelsize': 15,
+        'ytick.labelsize': 15,
         'legend.fontsize': 25
     })
     
@@ -276,6 +276,6 @@ def visual_traectories():
         print(f"График сохранен: {output_path}")
 
 if __name__ == "__main__":
-    #visual_conversation_laws()
+    visual_conversation_laws()
     #visual_traectories()
-    print_to_cadrs()
+    #print_to_cadrs()

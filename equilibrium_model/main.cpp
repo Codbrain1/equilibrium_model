@@ -24,7 +24,7 @@ std::vector<double> sistem_t;
 std::vector<double> sistem_E_k;
 std::vector<double> sistem_E_p;
 
-void calc_forces(std::vector<PPm::Particle>& ps, int i_0, int i_1)
+void calc_forces(std::vector<PPm::Particle>& ps,int i_0,int i_1)
 {
 	for (int i = i_0; i < i_1; i++)
 	{
@@ -33,7 +33,7 @@ void calc_forces(std::vector<PPm::Particle>& ps, int i_0, int i_1)
 
 	for (int i = i_0; i < i_1; i++)
 	{
-		for (int j = i + 1; j < ps.size(); j++)
+		for (int j = i+1; j < ps.size(); j++)
 		{
 			if (i != j)
 			{
@@ -62,13 +62,26 @@ void KDK(std::vector<PPm::Particle>& particles, int k, int i_0, int i_1)
 	}
 }
 
-std::vector<vec> k1(PPm::N,vec(0,0,0)), k2(PPm::N, vec(0, 0, 0)), k3(PPm::N, vec(0, 0, 0)), k4(PPm::N, vec(0, 0, 0));
-std::vector<vec> k1v(PPm::N, vec(0, 0, 0)), k2v(PPm::N, vec(0, 0, 0)), k3v(PPm::N, vec(0, 0, 0)), k4v(PPm::N, vec(0, 0, 0));
 // Рунге-Кутта 4 порядка
 void RungeKutta4(std::vector<PPm::Particle>& particles, int k, int i_0, int i_1) {
-	
+	std::vector<vec> k1(PPm::N), k2(PPm::N), k3(PPm::N), k4(PPm::N);
+	std::vector<vec> k1v(PPm::N), k2v(PPm::N), k3v(PPm::N), k4v(PPm::N);
 	// Шаг 1
-	calc_forces(particles, i_0, i_1);
+	for (int i = i_0; i < i_1; i++)
+	{
+		particles[i].F = vec(0, 0, 0);
+	}
+
+	for (size_t i = i_0; i < i_1; i++)
+	{
+		for (size_t j = 0; j < particles.size(); j++)
+		{
+			if (i != j)
+			{
+				particles[i].F = particles[i].F + PPm::F(particles[i], particles[j]);
+			}
+		}
+	}
 
 	for (size_t i = i_0; i < i_1; ++i) {
 		k1v[i] = particles[i].F * PPm::dt;
@@ -80,8 +93,21 @@ void RungeKutta4(std::vector<PPm::Particle>& particles, int k, int i_0, int i_1)
 		k2[i] = particles[i].r + k1[i] * 0.5;
 		k2v[i] = particles[i].v + k1v[i] * 0.5;
 	}
+	for (int i = i_0; i < i_1; i++)
+	{
+		particles[i].F = vec(0, 0, 0);
+	}
 
-	calc_forces(particles, i_0, i_1);
+	for (size_t i = i_0; i < i_1; i++)
+	{
+		for (size_t j = 0; j < particles.size(); j++)
+		{
+			if (i != j)
+			{
+				particles[i].F = particles[i].F + PPm::F(particles[i], particles[j]);
+			}
+		}
+	}
 
 	for (size_t i = 0; i < i_1; i++) {
 		k2v[i] = particles[i].F * PPm::dt;
@@ -158,20 +184,19 @@ void calculate_conversation_laws(std::vector<PPm::Particle>& particles, int k, i
 
 	for (int i = i_0; i < i_1; i++)
 	{
-		particles[i].E = 0.5 * particles[i].m * particles[i].v.module_2();	// set kinetical energy
+		particles[i].E = 0.5*particles[i].m * particles[i].v.module_2();	// set kinetical energy
 		particles[i].P = particles[i].v * particles[i].m;					// set impulse
 		particles[i].M = particles[i].r * particles[i].P;					// set moment impulse
 
 		sistem_E_k[k] += particles[i].m * particles[i].v.module_2() * 0.5;
 
-		for (int j = i+1; j < particles.size(); j++)
+		for (int j = i; j < particles.size(); j++)
 		{
 			if (i != j)
 			{
 				vec r_ij = particles[j].r - particles[i].r;
-				double r = sqrt(r_ij.module_2() + PPm::r_c);
-				particles[i].E -= PPm::G * particles[i].m * particles[j].m / r;	//set potential energy
-				sistem_E_p[k] -= PPm::G * particles[i].m * particles[j].m / r;
+				particles[i].E -= PPm::G * particles[i].m * particles[j].m / r_ij.module();	//set potential energy
+				sistem_E_p[k] -= PPm::G * particles[i].m * particles[j].m / r_ij.module();
 			}
 		}
 		sistem_E[k] += particles[i].E;
@@ -182,25 +207,7 @@ void calculate_conversation_laws(std::vector<PPm::Particle>& particles, int k, i
 
 double set_dinamic_step(std::vector<PPm::Particle>& ps)
 {
-	double min_dist = (ps[0].r - ps[1].r).module();
-	double max_a = ps[0].F.module();
-	for (int i = 0; i < ps.size(); i++)
-	{
-		for (int j = i + 1; j < ps.size(); j++)
-		{
-			double dist = (ps[i].r - ps[j].r).module();
-			if (dist < min_dist)
-				min_dist = dist;
-		}
-		double a = ps[i].F.module();
-		if (max_a < a)
-			max_a = a;
-	}
-	double new_dt = std::min(0.01*min_dist,0.1/sqrt(max_a));
-	new_dt = std::max(0.5 * PPm::dt, std::min(2.0 * PPm::dt, new_dt));
-	const double min_dt = 1e-10;
-	const double max_dt = 0.01;
-	return std::max(min_dt,std::min(new_dt,max_dt));
+	return 0;
 }
 void set_initial_conditions(std::vector<PPm::Particle>& ps)
 {
@@ -208,14 +215,15 @@ void set_initial_conditions(std::vector<PPm::Particle>& ps)
 	//setting the initial position
 		// 
 		//====================================================
-	std::vector<double> radii = { 1, 1, 1, 1, 1, 1, 1};
+	int temp_phi = 1;
 	for (int i = 0; i < N; i++)
 	{
-		ps[i].r.x = radii[i] * cos((2 * PI * i) / (N));
-		ps[i].r.y = radii[i] * sin((2 * PI * i) / (N));
+		ps[i].r.x = R_max * cos((2 * PI * temp_phi) / (N));
+		ps[i].r.y = R_max * sin((2 * PI * temp_phi) / (N));
 		ps[i].r.z = 0;
 		ps[i].m = M / N;
-	}
+		temp_phi++;
+	}									
 	calc_forces(ps, 0, ps.size());
 	//setting the initial velocity
 	// 
@@ -227,14 +235,12 @@ void set_initial_conditions(std::vector<PPm::Particle>& ps)
 		double r = i.r.module();
 
 		i.v.x = -r * v_asimutal * sin(phi);		// (kartesian coordinates)
-		i.v.y = r * v_asimutal * cos(phi);
+		i.v.y = r * v_asimutal * cos(phi);			
 		i.v.z = 0;
 	}
 }
 void diagnostic(std::vector<PPm::Particle>& particles)
 {
-	// ===== ДИАГНОСТИКА НАЧАЛЬНЫХ УСЛОВИЙ =====
-	std::cout << "\n=== Детальная проверка начальных условий ===\n";
 	// 1. Вывод позиций и скоростей
 	std::cout << "\nКоординаты и скорости частиц:\n";
 	std::cout << std::setprecision(15);
@@ -307,7 +313,6 @@ void diagnostic(std::vector<PPm::Particle>& particles)
 		<< total_L.y << ", " << total_L.z << ")\n";
 
 	std::cout << "\n=== Проверка завершена ===\n\n";
-	// ===== КОНЕЦ ДИАГНОСТИКИ =====
 }
 int main()
 {
@@ -319,8 +324,11 @@ int main()
 	//==========================================================
 	set_initial_conditions(particles);
 
+	// ===== ДИАГНОСТИКА НАЧАЛЬНЫХ УСЛОВИЙ =====
+	std::cout << "\n=== Детальная проверка начальных условий ===\n";
 
-
+	
+	// ===== КОНЕЦ ДИАГНОСТИКИ =====
 
 	std::cout << "set initial conditions\n";
 
@@ -346,7 +354,7 @@ int main()
 	positions << PPm::N << std::endl;
 	positions << PPm::t_0 << std::endl;
 
-	for (auto& p : particles)
+	for (auto & p:particles)
 	{
 		positions << std::setprecision(13) << p.r.x << " " << p.r.y << " " << p.r.z << " " << p.v.x << " " << p.v.y << " " << p.v.z << std::endl;
 	}
@@ -357,21 +365,20 @@ int main()
 
 	for (double t = PPm::t_0 + PPm::dt; t <= PPm::t_1; t += PPm::dt)
 	{
-
+		
 		KDK(particles, k, 0, particles.size());
-		PPm::dt = set_dinamic_step(particles);
+
 		if (b % PPm::div == 0) {
-			//std::cout << "t = " << t << "dt = " << PPm:: dt << std::endl;
 			sistem_E.push_back(0);
 			sistem_P.push_back(0);
 			sistem_M.push_back(0);
 			sistem_t.push_back(t);
 			sistem_E_k.push_back(0);
 			sistem_E_p.push_back(0);
-			calculate_conversation_laws(particles, sistem_E.size() - 1, 0, particles.size());
+			calculate_conversation_laws(particles, sistem_E.size()-1, 0, particles.size());
 
 			positions << t << std::endl;
-			for (auto& p : particles)
+			for (auto &p:particles)
 			{
 				positions << std::setprecision(13) << p.r.x << " " << p.r.y << " " << p.r.z << " " << p.v.x << " " << p.v.y << " " << p.v.z << std::endl;
 			}
@@ -385,12 +392,12 @@ int main()
 	std::ofstream conversation_laws("C:\\Users\\mesho\\Desktop\\научка_2025_весна\\программная_реализация_Равновесная_Модель\\визуальзация_измерений\\measurements.txt");
 	for (int i = 0; i < sistem_E.size(); i++)
 	{
-		conversation_laws << std::fixed << std::setprecision(13) << sistem_t[i] << " " << sistem_E[i] << " " << sistem_P[i] << " " << sistem_M[i] << " " << sistem_E_k[i] << " " << sistem_E_p[i] << " " << std::endl;
+		conversation_laws << std::fixed << std::setprecision(13) << sistem_t[i] << " " << sistem_E[i]  << " " << sistem_P[i] << " " << sistem_M[i] << " " << sistem_E_k[i] << " " << sistem_E_p[i] << " " << std::endl;
 	}
 	//====================================================================================================
 	PythonWrapper py;
 	py.vcl();
 	py.vt();
 	//py.ptc();
-
+	
 }
