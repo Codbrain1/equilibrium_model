@@ -190,7 +190,7 @@ void calculate_conversation_laws(std::vector<PPm::Particle>& particles, int k, i
 
 		sistem_E_k[k] += particles[i].m * particles[i].v.module_2() * 0.5;
 
-		for (int j = i; j < particles.size(); j++)
+		for (int j = i+1; j < particles.size(); j++)
 		{
 			if (i != j)
 			{
@@ -241,6 +241,8 @@ void set_initial_conditions(std::vector<PPm::Particle>& ps)
 }
 void diagnostic(std::vector<PPm::Particle>& particles)
 {
+	// ===== ДИАГНОСТИКА НАЧАЛЬНЫХ УСЛОВИЙ =====
+	std::cout << "\n=== Детальная проверка начальных условий ===\n";
 	// 1. Вывод позиций и скоростей
 	std::cout << "\nКоординаты и скорости частиц:\n";
 	std::cout << std::setprecision(15);
@@ -313,6 +315,8 @@ void diagnostic(std::vector<PPm::Particle>& particles)
 		<< total_L.y << ", " << total_L.z << ")\n";
 
 	std::cout << "\n=== Проверка завершена ===\n\n";
+
+	// ===== КОНЕЦ ДИАГНОСТИКИ =====
 }
 int main()
 {
@@ -324,11 +328,7 @@ int main()
 	//==========================================================
 	set_initial_conditions(particles);
 
-	// ===== ДИАГНОСТИКА НАЧАЛЬНЫХ УСЛОВИЙ =====
-	std::cout << "\n=== Детальная проверка начальных условий ===\n";
 
-	
-	// ===== КОНЕЦ ДИАГНОСТИКИ =====
 
 	std::cout << "set initial conditions\n";
 
