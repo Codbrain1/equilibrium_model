@@ -7,6 +7,10 @@
 #include <iomanip>
 #include<thread>
 #include"wrapper.h"
+#include<mutex>
+#include<Windows.h>
+
+std::mutex mut;
 double random(double beg, double end)
 {
 	std::random_device rd;
@@ -37,41 +41,112 @@ void calc_forces(std::vector<PPm::Particle>& ps, int i_0, int i_1)
 		{
 			if (i != j)
 			{
-				ps[i].F = ps[i].F + PPm::F(ps[i], ps[j]);
-				ps[j].F = ps[i].F * (-1) + ps[j].F;
+				mut.lock();
+				auto F_ij = PPm::F(ps[i], ps[j]);
+				ps[i].F = ps[i].F + F_ij;
+				ps[j].F = ps[j].F - F_ij;
+				mut.unlock();
 			}
 		}
 	}
 }
-void KDK(std::vector<PPm::Particle>& particles, int k, int i_0, int i_1)
+void calc_forces_asinc(std::vector<PPm::Particle>& ps, int i_0, int i_1)
 {
-	std::vector<vec> u_i(i_1 - i_0, vec(0, 0, 0));
 	for (int i = i_0; i < i_1; i++)
 	{
-		u_i[i - i_0] = particles[i].v;
-		particles[i].v = particles[i].v + particles[i].F * PPm::dt;
-		particles[i].r = particles[i].r + (particles[i].v + u_i[i - i_0]) * PPm::dt * 0.5;
+		for (int j = i + 1; j < ps.size(); j++)
+		{
+			if (i != j)
+			{
+				mut.lock();
+				auto F_ij = PPm::F(ps[i], ps[j]);
+				ps[i].F = ps[i].F + F_ij;
+				ps[j].F = ps[j].F - F_ij;
+				mut.unlock();
+			}
+		}
+	}
+}
+#include <vector>
+#include <thread>
+#include <functional>
+
+int KDK(std::vector<PPm::Particle>& ps, int th_n) {
+	// Проверка на корректность количества потоков
+	if (th_n <= 0 || th_n > std::thread::hardware_concurrency()) {
+		th_n = std::thread::hardware_concurrency();
 	}
 
+	const int N = ps.size();
+	std::vector<vec> u_i(N);  // Сохраняем начальные скорости для всех частиц
+	std::vector<std::thread> threads;
 
-	calc_forces(particles, i_0, i_1);
+	// Функция для обновления координат и скоростей (Drift + Kick)
+	for (int i = 0; i < ps.size(); ++i) {
+		u_i[i] = ps[i].v;                          // Сохраняем начальную скорость
+		ps[i].v = ps[i].v + ps[i].a * PPm::dt;              // Kick (обновление скорости)
+		ps[i].r = ps[i].r + (ps[i].v + u_i[i]) * 0.5 * PPm::dt; // Drift (обновление координат)
+	}
+	for (auto& p : ps)
+	{
+		p.F = vec(0, 0, 0);
+	}
+	// Запуск потоков для обновления частиц
+	int chunk_size = N / th_n;
+	// Параллельное вычисление сил (Kick)
+	for (int i = 0; i < th_n; ++i) {
+		int start = i * chunk_size;
+		int end = (i == th_n - 1) ? N : start + chunk_size;
+		threads.emplace_back(calc_forces_asinc, std::ref(ps), start, end);
+	}
 
+	for (auto& t : threads) {
+		t.join();
+	}
+	threads.clear();
+
+	// Обновление ускорений (после вычисления сил)
+	for (PPm::Particle& p : ps) {
+		p.Evaluate_a();  // Предполагается, что это метод класса Particle
+	}
+
+	// Финальное обновление скоростей (Kick)
+	for (int i = 0; i < ps.size(); i++) {
+		ps[i].v = (ps[i].v + u_i[i]) * 0.5 + ps[i].a * PPm::dt * 0.5;
+	}
+	return th_n;
+}
+void KDK(std::vector<PPm::Particle>& ps, int i_0, int i_1)
+{
+	std::vector<vec> u_i(ps.size(), vec(0, 0, 0));
 	for (int i = i_0; i < i_1; i++)
 	{
-		particles[i].v = (particles[i].v + u_i[i - i_0]) * 0.5 + particles[i].F * 0.5 * PPm::dt;
+		u_i[i - i_0] = ps[i].v;
+		ps[i].v = ps[i].v + ps[i].a * PPm::dt;
+		ps[i].r = ps[i].r + (ps[i].v + u_i[i - i_0]) * PPm::dt * 0.5;
+	}
+	calc_forces(ps, 0, ps.size());
+	for (auto& p : ps)
+		p.Evaluate_a();
+
+	for (int i = 0; i < ps.size(); i++)
+	{
+		ps[i].v = (ps[i].v + u_i[i]) * 0.5 + ps[i].a * 0.5 * PPm::dt;
 	}
 }
 
-std::vector<vec> k1(PPm::N,vec(0,0,0)), k2(PPm::N, vec(0, 0, 0)), k3(PPm::N, vec(0, 0, 0)), k4(PPm::N, vec(0, 0, 0));
-std::vector<vec> k1v(PPm::N, vec(0, 0, 0)), k2v(PPm::N, vec(0, 0, 0)), k3v(PPm::N, vec(0, 0, 0)), k4v(PPm::N, vec(0, 0, 0));
-// Рунге-Кутта 4 порядка
-void RungeKutta4(std::vector<PPm::Particle>& particles, int k, int i_0, int i_1) {
-	
+
+void RungeKutta4(std::vector<PPm::Particle>& particles, int i_0, int i_1) {
+	std::vector<vec> k1(PPm::N, vec(0, 0, 0)), k2(PPm::N, vec(0, 0, 0)), k3(PPm::N, vec(0, 0, 0)), k4(PPm::N, vec(0, 0, 0));
+	std::vector<vec> k1v(PPm::N, vec(0, 0, 0)), k2v(PPm::N, vec(0, 0, 0)), k3v(PPm::N, vec(0, 0, 0)), k4v(PPm::N, vec(0, 0, 0));
+	// Рунге-Кутта 4 порядка
 	// Шаг 1
 	calc_forces(particles, i_0, i_1);
+	for (int i = i_0; i < i_1; i++)
+		particles[i].Evaluate_a();
 
 	for (size_t i = i_0; i < i_1; ++i) {
-		k1v[i] = particles[i].F * PPm::dt;
+		k1v[i] = particles[i].a * PPm::dt;
 		k1[i] = particles[i].v * PPm::dt;
 	}
 
@@ -82,9 +157,11 @@ void RungeKutta4(std::vector<PPm::Particle>& particles, int k, int i_0, int i_1)
 	}
 
 	calc_forces(particles, i_0, i_1);
+	for (int i = i_0; i < i_1; i++)
+		particles[i].Evaluate_a();
 
 	for (size_t i = 0; i < i_1; i++) {
-		k2v[i] = particles[i].F * PPm::dt;
+		k2v[i] = particles[i].a * PPm::dt;
 		k2[i] = (particles[i].v + k1[i] * 0.5) * PPm::dt;
 	}
 
@@ -93,24 +170,12 @@ void RungeKutta4(std::vector<PPm::Particle>& particles, int k, int i_0, int i_1)
 		k3[i] = particles[i].r + k2[i] * 0.5;
 		k3v[i] = particles[i].v + k2[i] * 0.5;
 	}
+	calc_forces(particles, i_0, i_1);
 	for (int i = i_0; i < i_1; i++)
-	{
-		particles[i].F = vec(0, 0, 0);
-	}
-
-	for (size_t i = i_0; i < i_1; i++)
-	{
-		for (size_t j = 0; j < particles.size(); j++)
-		{
-			if (i != j)
-			{
-				particles[i].F = particles[i].F + PPm::F(particles[i], particles[j]);
-			}
-		}
-	}
+		particles[i].Evaluate_a();
 
 	for (size_t i = i_0; i < PPm::N; ++i) {
-		k3v[i] = particles[i].F * PPm::dt;
+		k3v[i] = particles[i].a * PPm::dt;
 		k3[i] = (particles[i].v + k2v[i] * 0.5) * PPm::dt;
 	}
 
@@ -119,24 +184,12 @@ void RungeKutta4(std::vector<PPm::Particle>& particles, int k, int i_0, int i_1)
 		k4[i] = particles[i].r + k3[i];
 		k4v[i] = particles[i].v + k3v[i];
 	}
+	calc_forces(particles, i_0, i_1);
 	for (int i = i_0; i < i_1; i++)
-	{
-		particles[i].F = vec(0, 0, 0);
-	}
-
-	for (size_t i = i_0; i < i_1; i++)
-	{
-		for (size_t j = 0; j < particles.size(); j++)
-		{
-			if (i != j)
-			{
-				particles[i].F = particles[i].F + PPm::F(particles[i], particles[j]);
-			}
-		}
-	}
+		particles[i].Evaluate_a();
 
 	for (size_t i = i_0; i < i_1; i++) {
-		k4v[i] = particles[i].F * PPm::dt;
+		k4v[i] = particles[i].a * PPm::dt;
 		k4[i] = (particles[i].v + k3v[i]) * PPm::dt;
 	}
 
@@ -147,43 +200,63 @@ void RungeKutta4(std::vector<PPm::Particle>& particles, int k, int i_0, int i_1)
 	}
 }
 
-void calculate_conversation_laws(std::vector<PPm::Particle>& particles, int k, int i_0, int i_1)
+void Leapfrog(std::vector<PPm::Particle>& particles, int i_0, int i_1)
+{
+	calc_forces(particles, i_0, i_1);
+	for (int i = i_0; i < i_1; i++)
+		particles[i].Evaluate_a();
+
+	std::vector<vec> dv(particles.size());
+	for (int i = 0; i < particles.size(); i++)
+	{
+		dv[i] = particles[i].a * PPm::dt;
+		particles[i].r = particles[i].r + (particles[i].v + dv[i] * 0.5) * PPm::dt;
+		particles[i].v = particles[i].v + dv[i];
+
+	}
+}
+
+void calculate_conversation_laws(std::vector<PPm::Particle>& ps, int k, int i_0, int i_1)
 {
 	for (size_t i = i_0; i < i_1; i++)
 	{
-		particles[i].E = 0;
-		particles[i].P = vec(0, 0, 0);
-		particles[i].M = vec(0, 0, 0);
+		ps[i].E = 0;
+		ps[i].P = vec(0, 0, 0);
+		ps[i].M = vec(0, 0, 0);
 	}
 
 	for (int i = i_0; i < i_1; i++)
 	{
-		particles[i].E = 0.5 * particles[i].m * particles[i].v.module_2();	// set kinetical energy
-		particles[i].P = particles[i].v * particles[i].m;					// set impulse
-		particles[i].M = particles[i].r * particles[i].P;					// set moment impulse
+		auto E_k = 0.5 * ps[i].m * ps[i].v.module_2();
+		ps[i].E = E_k;	// set kinetical energy
+		ps[i].P = ps[i].v * ps[i].m;					// set impulse
+		ps[i].M = ps[i].r * ps[i].P;					// set moment impulse
 
-		sistem_E_k[k] += particles[i].m * particles[i].v.module_2() * 0.5;
+		sistem_E_k[k] += E_k;
 
-		for (int j = i+1; j < particles.size(); j++)
+		for (int j = i + 1; j < ps.size(); j++)
 		{
 			if (i != j)
 			{
-				vec r_ij = particles[j].r - particles[i].r;
+				vec r_ij = ps[j].r - ps[i].r;
 				double r = sqrt(r_ij.module_2() + PPm::r_c);
-				particles[i].E -= PPm::G * particles[i].m * particles[j].m / r;	//set potential energy
-				sistem_E_p[k] -= PPm::G * particles[i].m * particles[j].m / r;
+
+				auto E_p = -PPm::G * ps[i].m * ps[j].m / r;//set potential energy
+
+				ps[i].E += E_p;
+				sistem_E_p[k] += E_p;
 			}
 		}
-		sistem_E[k] += particles[i].E;
-		sistem_P[k] = sistem_P[k] + particles[i].P.module();
-		sistem_M[k] = sistem_M[k] + particles[i].M.module();
+		sistem_E[k] += ps[i].E;
+		sistem_P[k] = sistem_P[k] + ps[i].P.module();
+		sistem_M[k] = sistem_M[k] + ps[i].M.module();
 	}
 }
 
-double set_dinamic_step(std::vector<PPm::Particle>& ps)
+void set_dinamic_step(std::vector<PPm::Particle>& ps)
 {
 	double min_dist = (ps[0].r - ps[1].r).module();
-	double max_a = ps[0].F.module();
+	double max_a = ps[0].a.module();
 	for (int i = 0; i < ps.size(); i++)
 	{
 		for (int j = i + 1; j < ps.size(); j++)
@@ -192,37 +265,45 @@ double set_dinamic_step(std::vector<PPm::Particle>& ps)
 			if (dist < min_dist)
 				min_dist = dist;
 		}
-		double a = ps[i].F.module();
+		double a = ps[i].a.module();
 		if (max_a < a)
 			max_a = a;
 	}
-	double new_dt = std::min(0.01*min_dist,0.1/sqrt(max_a));
-	new_dt = std::max(0.5 * PPm::dt, std::min(2.0 * PPm::dt, new_dt));
-	const double min_dt = 1e-10;
-	const double max_dt = 0.01;
-	return std::max(min_dt,std::min(new_dt,max_dt));
+	double new_dt = (std::min)(0.01 * min_dist, 0.1 / sqrt(max_a));
+	new_dt = (std::max)(0.5 * PPm::dt, (std::min)(2.0 * PPm::dt, new_dt));
+	const double min_dt = PPm::mindt;
+	const double max_dt = PPm::maxdt;
+	PPm::dt = (std::max)(min_dt, (std::min)(new_dt, max_dt));
 }
+
 void set_initial_conditions(std::vector<PPm::Particle>& ps)
 {
 	using namespace Partcile_Particle_model;
 	//setting the initial position
 		// 
 		//====================================================
-	std::vector<double> radii = { 1, 1, 1, 1, 1, 1, 1};
-	for (int i = 0; i < N; i++)
+	double dr = 0.1;
+	double r_0 = 0.2;
+	for (int j = 1; j * dr + r_0 <= R_max; j++)
 	{
-		ps[i].r.x = radii[i] * cos((2 * PI * i) / (N));
-		ps[i].r.y = radii[i] * sin((2 * PI * i) / (N));
-		ps[i].r.z = 0;
-		ps[i].m = M / N;
+		for (int i = (j - 1) * N / 8; i < j * N / 8; i++)
+		{
+			ps[i].r.x = (r_0 + j * dr * 0.5 + random(-dr * 0.5, dr * 0.5)) * cos((2 * PI * i) / (N / 8) + i * PI/6);
+			ps[i].r.y = (r_0 + j * dr * 0.5 + random(-dr * 0.5, dr * 0.5)) * sin((2 * PI * i) / (N / 8) + i * PI/6);
+			ps[i].r.z = 0;
+			ps[i].m = M / N;
+		}
 	}
-	calc_forces(ps, 0, ps.size());
+
+	calc_forces(ps, 0, N);
+	for (auto& p : ps)
+		p.Evaluate_a();
 	//setting the initial velocity
 	// 
 	//==========================================================
 	for (auto& i : ps) {
 
-		double v_asimutal = sqrt(i.r.module() * i.F.module());		// (cylindrical coordinates)
+		double v_asimutal = sqrt(i.r.module() * i.a.module());		// (cylindrical coordinates)
 		double phi = atan2(i.r.y, i.r.x);
 		double r = i.r.module();
 
@@ -235,15 +316,10 @@ void set_initial_conditions(std::vector<PPm::Particle>& ps)
 int main()
 {
 	std::vector<PPm::Particle> particles(PPm::N); //array particals in model
-
-
 	//setting the initial conditions
 	// 
 	//==========================================================
 	set_initial_conditions(particles);
-
-
-
 
 	std::cout << "set initial conditions\n";
 
@@ -257,7 +333,6 @@ int main()
 	calculate_conversation_laws(particles, 0, 0, particles.size());
 	std::cout << "set intitial conversation laws\n";
 	//==========================================================
-
 
 // integration of differential equations
 // 
@@ -278,18 +353,13 @@ int main()
 	int b = 1;
 	std::cout << "start calculating\n";
 
+	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+	COORD pos = { 0, 4 };
+
 	for (double t = PPm::t_0 + PPm::dt; t <= PPm::t_1; t += PPm::dt)
 	{
-
-		std::thread th1(KDK, std::ref(particles), k, 0, particles.size() / 4);
-		std::thread th2(KDK, std::ref(particles), k, particles.size() / 4, particles.size() / 2);
-		std::thread th3(KDK, std::ref(particles), k, particles.size() / 2, 3 * particles.size() / 4);
-		std::thread th4(KDK, std::ref(particles), k, 3 * particles.size() / 4, particles.size());
-		th1.join();
-		th2.join();
-		th3.join();
-		th4.join();
-		PPm::dt = set_dinamic_step(particles);
+		auto th_n = KDK(particles, 4);
+		std::thread th(set_dinamic_step,ref(particles));
 		if (b % PPm::div == 0) {
 			//std::cout << "t = " << t << "dt = " << PPm:: dt << std::endl;
 			sistem_E.push_back(0);
@@ -307,10 +377,14 @@ int main()
 			}
 			k++;
 		}
+		th.join();
 		b++;
-
+		SetConsoleCursorPosition(hConsole, pos);
+		std::cout << "\n";
+		SetConsoleCursorPosition(hConsole, pos);
+		std::cout <<std::setprecision(5)<< "[(t_n,t_1): " << t << "/" << PPm::t_1 << ", dt = " << PPm::dt << ", threads: " << th_n << "]";
 	}
-	std::cout << "end calculating\n";
+	std::cout << "\nend calculating\n";
 	std::cout << "write conwersation laws into file\n";
 	std::ofstream conversation_laws("C:\\Users\\mesho\\Desktop\\научка_2025_весна\\программная_реализация_Равновесная_Модель\\визуальзация_измерений\\measurements.txt");
 	for (int i = 0; i < sistem_E.size(); i++)
@@ -321,6 +395,6 @@ int main()
 	PythonWrapper py;
 	py.vcl();
 	py.vt();
-	//py.ptc();
+	py.ptc();
 
 }

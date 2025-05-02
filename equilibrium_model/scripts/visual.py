@@ -257,7 +257,7 @@ def visual_traectories():
         # Конечные точки (зеленые)
         for i in range(0, N):
             if X[i] and Y[i]:
-                ax.scatter([X[i][-1]], [Y[i][-1]], s=100, c='green', linewidths=5)
+                ax.scatter([X[i][-1]], [Y[i][-1]], s=100, c='blue', linewidths=1.4)
                 
         # ax.set_xlim(-5, 5)  
         # ax.set_ylim(-5, 5)
@@ -277,5 +277,5 @@ def visual_traectories():
 
 if __name__ == "__main__":
     #visual_conversation_laws()
-    #visual_traectories()
-    print_to_cadrs()
+    visual_traectories()
+    #print_to_cadrs()
