@@ -5,8 +5,6 @@
 #include<cmath>
 #include"Particle.h"
 #include <iomanip>
-#include"wrapper.h"
-#include<Windows.h>
 #include<chrono>
 #include<omp.h>
 
@@ -376,7 +374,7 @@ void set_initial_circle(std::vector<PPm::Particle>& ps)
 
 int main()
 {
-	omp_set_num_threads(std::thread::hardware_concurrency());
+	// omp_set_num_threads(std::thread::hardware_concurrency());
 	auto start = std::chrono::high_resolution_clock::now();
 	std::vector<PPm::Particle> particles(PPm::N); //array particals in model
 
@@ -426,8 +424,8 @@ int main()
 	//	===BEGIN SIMULATION===
 	int b = 1;
 	std::cout << "start calculating\n";
-	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE); //current simulate data
-	COORD pos = { 0, 4 };
+	// HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE); //current simulate data
+	// COORD pos = { 0, 4 };
 
 	for (double t = PPm::t_0 + PPm::dt; t <= PPm::t_1; t += PPm::dt)
 	{
@@ -456,20 +454,19 @@ int main()
 			time << el.count() << " " << PPm::dt << std::endl;
 		}
 		b++;
-		SetConsoleCursorPosition(hConsole, pos);
+		// SetConsoleCursorPosition(hConsole, pos);
 		auto end = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> elapsed = end - start;
+		std::cout << "\033[4;0H";
 		std::cout << std::setprecision(5) << "[(t_n,t_1): " << t << "/" << PPm::t_1 << ", dt = " << PPm::dt << ", Время выполнения: " << elapsed.count() << " секунд" << "]";
 	}
 	std::cout << "\nend calculating\n";
+	
 	//	===END SIMULATION===
 
 	//python visualisation
 	//====================================================================================================
-	PythonWrapper py;
-	py.vcl();
-	py.vt();
-	py.vdtt();
-	//py.ptc();
 
+// comment	
+	return 0;
 }
