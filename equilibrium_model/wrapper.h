@@ -54,5 +54,14 @@ public:
 			throw std::runtime_error("Ошибка загрузки функции:" + std::string(e.what()));
 		}
 	}
+	void vdtt()
+	{
+		try {
+			python_module.attr("visual_dependens_dt_time")();
+		}
+		catch (const pyth::error_already_set& e) {
+			throw std::runtime_error("Ошибка загрузки функции:" + std::string(e.what()));
+		}
+	}
 
 };
