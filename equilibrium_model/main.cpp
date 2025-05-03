@@ -5,10 +5,8 @@
 #include<cmath>
 #include"Particle.h"
 #include <iomanip>
-#include<thread>
 #include"wrapper.h"
 #include<Windows.h>
-
 #include<chrono>
 #include<omp.h>
 
@@ -56,6 +54,8 @@ void calc_acceleration_asinc(std::vector<PPm::Particle>& ps, int i_0, int i_1)
 	for (int i = i_0; i < i_1; i++)
 	{
 		ps[i].a = vec(0, 0, 0);
+
+		
 		for (int j = 0; j < ps.size(); j++)
 		{
 			if (i != j)
@@ -75,15 +75,16 @@ void KDK_parallel(std::vector<PPm::Particle>& ps) {
 
 	// Функция для обновления координат и скоростей (Drift + Kick)
 	#pragma omp parallel for 
-	for (int i = 0; i < ps.size(); ++i) {
+	for (int i = 0; i < N; ++i) {
 		u_i[i] = ps[i].v + ps[i].a * PPm::dt;                     // Kick (обновление скорости)
 		ps[i].r = ps[i].r + (ps[i].v + u_i[i]) * 0.5 * PPm::dt;  // Drift (обновление координат)
 	}
+
 	calc_acceleration_asinc(ps, 0, ps.size());
 
 	// Финальное обновление скоростей (Kick)
-	#pragma omp parallel for
-	for (int i = 0; i < ps.size(); i++) {
+	#pragma omp parallel for 
+	for (int i = 0; i < N; i++) {
 		ps[i].v = (ps[i].v + u_i[i]) * 0.5 + ps[i].a * PPm::dt * 0.5;
 	}
 }
@@ -308,20 +309,19 @@ void set_exponential_disk(std::vector<PPm::Particle>& ps)
 	std::mt19937 gen(42);
 	std::uniform_real_distribution<double> angle_dist(0, 2 * PI);
 
-	const double h = 0.2;      // Масштабный радиус диска
-	const double r_core = 0.05 * h;//ядро смягчения потенциала
+	const double r_core = 0.05 * r_alpha;//ядро смягчения потенциала
 
 	// Экспоненциальное распределение с ядром
 	for (int i = 0; i < N; ++i) {
 		double u = (i + 0.5) / N;
-		double r = -h * log(1 - u);
+		double r = -r_alpha * log(1 - u);
 
 		// Плавный переход в центре
 		double r_eff = sqrt(r * r + r_core * r_core);
 		double theta = angle_dist(gen);
 
 		// Кривая вращения с поправкой на ядро
-		double v_circ = sqrt(M * pow(r_eff, 3) / pow(r_eff + h, 3));
+		double v_circ = sqrt(M * pow(r_eff, 3) / pow(r_eff + r_alpha, 3));
 
 		// Дисперсия скоростей (20% радиальная, 10% тангенциальная)
 		std::normal_distribution<double> rad_vel(0, 0.2 * v_circ);
@@ -376,6 +376,7 @@ void set_initial_circle(std::vector<PPm::Particle>& ps)
 
 int main()
 {
+	omp_set_num_threads(std::thread::hardware_concurrency());
 	auto start = std::chrono::high_resolution_clock::now();
 	std::vector<PPm::Particle> particles(PPm::N); //array particals in model
 
@@ -384,7 +385,7 @@ int main()
 	//==========================================================
 	
 	//set_exponential_disk(particles);
-	set_initial_circle(particles);
+	set_exponential_disk(particles);
 	std::cout << "set initial conditions\n";
 
 	sistem_E = 0;
@@ -433,15 +434,7 @@ int main()
 		
 		//KDK(particles, 0, particles.size());
 		KDK_parallel(particles);
-		set_dinamic_step_parallel(particles);
-		if (PPm::dt < 1e-5)
-		{
-			PPm::div = 1000;
-		}
-		else
-		{
-			PPm::div = 1;
-		}
+		//set_dinamic_step(particles);
 		if (b % PPm::div == 0) {
 			sistem_E = 0;
 			sistem_P = 0;

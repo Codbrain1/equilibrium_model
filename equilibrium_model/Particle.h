@@ -3,7 +3,7 @@
 #include"vec.h"
 namespace Particle_Particle_model {
 	
-	struct Particle
+	struct  Particle
 	{
 	public:
 

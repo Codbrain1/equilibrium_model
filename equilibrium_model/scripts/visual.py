@@ -19,7 +19,7 @@ def save_plot(fig, filename, show=False):
 def visual_conversation_laws():
     E = []
     P = []
-    M = []
+    L = []
     t = []
     E_k = []
     E_p = [] 
@@ -36,14 +36,14 @@ def visual_conversation_laws():
             time = float(parts[0])
             _E = float(parts[1])
             _P = float(parts[2])
-            _M = float(parts[3])
+            _L = float(parts[3])
             _E_k = float(parts[4])
             _E_p = float(parts[5])
             #_R = float(parts[6])
             
             E.append(_E)
             P.append(_P)
-            M.append(_M)
+            L.append(_L)
             t.append(time)
             E_k.append(_E_k)
             E_p.append(_E_p)
@@ -77,7 +77,7 @@ def visual_conversation_laws():
     ax1.ticklabel_format(axis='y', style='sci', scilimits=(0,0))
     ax1.grid(True)  # Сетка включается отдельно для каждого axes
     ax1.legend(loc='upper right', framealpha=0.9)
-    save_plot(fig1, "energy.png", show=True)
+    save_plot(fig1, "energy.png")
 
     # 2. График относительного изменения энергии
     dEE_0 = [abs(Ei-E[0])/abs(E[0]) for Ei in E]
@@ -98,15 +98,26 @@ def visual_conversation_laws():
     ax3.legend(loc='upper right', framealpha=0.9)
     save_plot(fig3, "impulse.png")
 
+     
     # 4. График момента импульса
     fig4, ax4 = plt.subplots(**plot_params)
-    ax4.plot(t, M, label="Момент импульса", color='tab:purple', linewidth=2)
+    ax4.plot(t, L, label="Момент импульса", color='tab:purple', linewidth=2)
     ax4.set_xlabel("Время, t", fontweight='bold')
-    ax4.set_ylabel("Момент, M", fontweight='bold')
+    ax4.set_ylabel("Момент, L", fontweight='bold')
     ax4.grid(True)
     ax4.legend(loc='upper right', framealpha=0.9)
-    save_plot(fig4, "moment_impulse.png", show=True)
-
+    save_plot(fig4, "moment_impulse.png")
+    
+    # 2. График относительного изменения момента импульса
+    dLL_0 = [abs(Li-L[0])/(abs(L[0]) + 1e-16) for Li in L] 
+    fig2, ax2 = plt.subplots(**plot_params)
+    ax2.semilogy(t, dLL_0, label="KDK", color='tab:red', linewidth=2)
+    ax2.set_xlabel("Время, t", fontweight='bold')
+    ax2.set_ylabel(r"$\frac{\Delta L}{L_0}$", fontweight='bold')
+    ax2.grid(True)
+    ax2.legend(loc='upper right', framealpha=0.9)
+    save_plot(fig2, "Momen_impulse_dL_L_0.png")
+    
     # 5. График кинетической энергии
     fig5, ax5 = plt.subplots(**plot_params)
     ax5.plot(t, E_k, label="Кинетическая энергия", color='tab:orange', linewidth=2)
@@ -169,7 +180,7 @@ def visual_dependens_dt_time():
              color='tab:blue', linewidth=2.5)
 
     # Настройки осей
-    ax1.set_xlabel("Время, t", fontsize=22, fontweight='bold')
+    ax1.set_xlabel("Время, t секунд", fontsize=22, fontweight='bold')
     ax1.set_ylabel("Δt", fontsize=22, fontweight='bold')
     ax1.ticklabel_format(axis='y', style='sci', scilimits=(0,0))
 
@@ -197,13 +208,24 @@ def visual_dependens_dt_time():
                bbox_inches='tight', 
                facecolor='white',        # Белый фон при сохранении
                edgecolor='none')
-
-    plt.show()
     plt.close(fig1)
     print(f"График сохранен: {output_path}")
     
-def print_to_cadrs():
-    count=0
+def print_to_traectories_cadrs():
+    count=0 
+    plt.style.use('seaborn-v0_8')
+    mpl.rcParams.update({
+        'axes.titlesize': 24,
+        'axes.labelsize': 22,
+        'xtick.labelsize': 18,
+        'ytick.labelsize': 18,
+        'legend.fontsize': 20,
+        'figure.titlesize': 26,
+        'font.family': 'serif',
+        'grid.alpha': 0.2,  # Более светлая сетка
+        'grid.linestyle': '--',
+        'grid.color': 'gray'  # Серый цвет для сетки
+    })
     # Чтение данных из файла
     with open(r"C:\Users\mesho\Desktop\научка_2025_весна\программная_реализация_Равновесная_Модель\визуальзация_измерений\positions.txt", 'r') as stream:
         N = int(stream.readline())
@@ -230,7 +252,7 @@ def print_to_cadrs():
                 X[i].append(x)
                 Y[i].append(y)
                 
-            div=100
+            div=10
             
             if count%div==0:
                 # Построение графика
@@ -250,7 +272,7 @@ def print_to_cadrs():
     
                 # Траектории
                 for i in range(N):
-                    ax.plot(X[i], Y[i], linewidth=1)
+                     ax.plot(X[i], Y[i], linewidth=1)
     
                 # Конечные точки (зеленые)
                 for i in range(0, N):
@@ -273,7 +295,78 @@ def print_to_cadrs():
                 plt.close(fig)
                 #print(f"График сохранен: {output_path}")
             count+=1
+def print_to_cadrs():
+    count=0 
+    plt.style.use('seaborn-v0_8')
+    mpl.rcParams.update({
+        'axes.titlesize': 24,
+        'axes.labelsize': 22,
+        'xtick.labelsize': 18,
+        'ytick.labelsize': 18,
+        'legend.fontsize': 20,
+        'figure.titlesize': 26,
+        'font.family': 'serif',
+        'grid.alpha': 0.2,  # Более светлая сетка
+        'grid.linestyle': '--',
+        'grid.color': 'gray'  # Серый цвет для сетки
+    })
+    # Чтение данных из файла
+    with open(r"C:\Users\mesho\Desktop\научка_2025_весна\программная_реализация_Равновесная_Модель\визуальзация_измерений\positions.txt", 'r') as stream:
+        N = int(stream.readline())
+        
+        
+        while True:
+            time = 0
+            X = []
+            Y = []
+            line = stream.readline()
+            if not line:
+                break
+            t = float(line.strip())
+            time = t
             
+            for i in range(N):
+                parts = stream.readline().strip().split()
+                if len(parts) != 6:
+                    raise ValueError(f"Ожидалось 6 значений для объекта {i}, получено {len(parts)}")
+                
+                x = float(parts[0])
+                y = float(parts[1])
+                X.append(x)
+                Y.append(y)
+                
+            div=10
+            
+            if count%div==0:
+                # Построение графика
+                fig, ax = plt.subplots(figsize=(12, 10))
+                plt.axis('equal')
+                #ax.set_aspect('equal', adjustable='box')
+                
+                # Начальная точка (золотая)
+                #ax.scatter(X1, Y1, s=100, c='gold', linewidths=5)
+    
+                # Конечные точки (синие)
+                for i in range(0, N):
+                    if X[i] and Y[i]:
+                        ax.scatter(X[i], Y[i], s=2, c='blue', linewidths=1.5)
+                # ax.set_xlim(-5, 5)  
+                # ax.set_ylim(-5, 5)
+                fig.suptitle(str(time))        
+                # Настройка научной нотации
+                ax.ticklabel_format(axis='both', style='sci', scilimits=(0,0))
+                set_scientific_fontsize(ax, 30)
+                
+                ax.set_xlabel("x", fontsize=30)
+                ax.set_ylabel("y", fontsize=30)
+                ax.grid(True)
+                plt.subplots_adjust(left=0.2, right=0.9, bottom=0.15, top=0.9)
+                output_path = r"C:\Users\mesho\Desktop\научка_2025_весна\программная_реализация_Равновесная_Модель\визуальзация_измерений\conversation_laws\traectories"+str(count)+".png"
+                plt.savefig(output_path)
+                plt.close(fig)
+                #print(f"График сохранен: {output_path}")
+            count+=1
+             
 def visual_traectories():
     # Чтение данных из файла
     with open(r"C:\Users\mesho\Desktop\научка_2025_весна\программная_реализация_Равновесная_Модель\визуальзация_измерений\positions.txt", 'r') as stream:
@@ -341,7 +434,7 @@ def visual_traectories():
         print(f"График сохранен: {output_path}")
 
 if __name__ == "__main__":
-    visual_conversation_laws()
-    visual_traectories()
-    # print_to_cadrs()
-    visual_dependens_dt_time()
+    #visual_conversation_laws()
+    #visual_traectories()
+    print_to_cadrs()
+    #visual_dependens_dt_time()
