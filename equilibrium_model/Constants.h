@@ -18,7 +18,7 @@ namespace Particle_Particle_model {
 	double M = 1;//общая масса частиц
 	double r_0 = 0; //начальбный радиус
 	double dr = R_max; //шаг по радиальной компоненте
-	const double r_alpha =0.2;
+	const double r_alpha =0.25;
 	const double sigma_0=0;
 
 }

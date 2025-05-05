@@ -298,46 +298,53 @@ void set_dinamic_step_parallel(std::vector<PPm::Particle>& ps)
 	PPm::dt = (std::max)(min_dt, (std::min)(new_dt, max_dt));
 }
 
-void set_exponential_disk(std::vector<PPm::Particle>& ps)
+void set_exponential_disk(std::vector<PPm::Particle>& ps,int i_0,int i_1,double _x_,double _y_)
 {
-	using namespace Particle_Particle_model;
-	//setting the initial position
-		// 
-		//====================================================
-	std::mt19937 gen(42);
-	std::uniform_real_distribution<double> angle_dist(0, 2 * PI);
+    using namespace Particle_Particle_model;
+    std::mt19937 gen(42);
+    std::uniform_real_distribution<double> angle_dist(0, 2 * PI);
+    const double r_core = 0.05 * r_alpha; // ядро смягчения потенциала
+	int _N=i_1-i_0;
+    // Экспонциальное распределение с ядром
+    for (int i = i_0; i < i_1; ++i) {
+        double u = (i-i_0 + 0.5) / _N;
+        double r = -r_alpha * log(1 - u);
 
-	const double r_core = 0.05 * r_alpha;//ядро смягчения потенциала
+        // Плавный переход в центре
+        double r_eff = sqrt(r * r + r_core * r_core);
+        double theta = angle_dist(gen);
 
-	// Экспоненциальное распределение с ядром
-	for (int i = 0; i < N; ++i) {
-		double u = (i + 0.5) / N;
-		double r = -r_alpha * log(1 - u);
+        // Кривая вращения с поправкой на ядро
+        double v_circ = sqrt(M * pow(r_eff, 3) / pow(r_eff + r_alpha, 3));
 
-		// Плавный переход в центре
-		double r_eff = sqrt(r * r + r_core * r_core);
-		double theta = angle_dist(gen);
+        // Положение частицы
+        ps[i].r.x = r * cos(theta)+_x_;
+        ps[i].r.y = r * sin(theta)+_y_;
+        ps[i].r.z = 0;
 
-		// Кривая вращения с поправкой на ядро
-		double v_circ = sqrt(M * pow(r_eff, 3) / pow(r_eff + r_alpha, 3));
+        // Чисто круговая скорость (тангенциальная)
+        ps[i].v.x = -v_circ * sin(theta);  // v_φ = -v_circ * sin(θ)
+        ps[i].v.y = v_circ * cos(theta);   // v_φ = v_circ * cos(θ)
+        ps[i].v.z = 0;
 
-		// Дисперсия скоростей (20% радиальная, 10% тангенциальная)
-		std::normal_distribution<double> rad_vel(0, 0.2 * v_circ);
-		std::normal_distribution<double> tang_vel(v_circ, 0.1 * v_circ);
+        // Добавляем случайные компоненты (радиальную и тангенциальную)
+        std::normal_distribution<double> rad_vel(0, 0.2 * v_circ);
+        std::normal_distribution<double> tang_vel(0, 0.1 * v_circ);
+        
+        double v_rad = rad_vel(gen);
+        double v_tang = tang_vel(gen);
+        
+        // Преобразование случайных компонент в декартовы координаты
+        ps[i].v.x += v_rad * cos(theta) - v_tang * sin(theta);
+        ps[i].v.y += v_rad * sin(theta) + v_tang * cos(theta);
 
-		ps[i].r.x = r * cos(theta);
-		ps[i].r.y = r * sin(theta);
-		ps[i].r.z = 0;
-
-		ps[i].v.x = -tang_vel(gen) * sin(theta) + rad_vel(gen) * cos(theta);
-		ps[i].v.y = tang_vel(gen) * cos(theta) + rad_vel(gen) * sin(theta);
-		ps[i].v.z = 0;
-
-		ps[i].m = M / N;
-	}
-	calc_forces(ps, 0, ps.size());
-	for (auto& i : ps)
-		i.Evaluate_a();
+        ps[i].m = M / N;
+    }
+    
+    calc_forces(ps, i_0, i_1);
+    for (int i=i_0;i<i_1;++i) {
+        ps[i].Evaluate_a();
+    }
 }
 
 void set_initial_circle(std::vector<PPm::Particle>& ps)
@@ -383,7 +390,8 @@ int main()
 	//==========================================================
 	
 	//set_exponential_disk(particles);
-	set_exponential_disk(particles);
+	set_exponential_disk(particles,0,PPm::N/2,-1,0);
+	set_exponential_disk(particles,PPm::N/2,PPm::N,1,0);
 	std::cout << "set initial conditions\n";
 
 	sistem_E = 0;
@@ -402,7 +410,9 @@ int main()
 //========================================================================================================================
 
 	//write initial positions into file
-	std::ofstream positions("C:\\Users\\mesho\\Desktop\\научка_2025_весна\\программная_реализация_Равновесная_Модель\\визуальзация_измерений\\positions.txt");
+	//std::ofstream positions("C:\\Users\\mesho\\Desktop\\научка_2025_весна\\программная_реализация_Равновесная_Модель\\визуальзация_измерений\\positions.txt");
+	std::ofstream positions("/home/mask/windows/научка/результат_моделирования/positions.txt");
+	
 	positions << PPm::N << std::endl;
 	positions << PPm::t_0 << std::endl;
 	for (auto& p : particles)
@@ -411,12 +421,15 @@ int main()
 	}
 
 	//write initial conversation laws into file
-	std::ofstream conversation_laws("C:\\Users\\mesho\\Desktop\\научка_2025_весна\\программная_реализация_Равновесная_Модель\\визуальзация_измерений\\measurements.txt");
+	//std::ofstream conversation_laws("C:\\Users\\mesho\\Desktop\\научка_2025_весна\\программная_реализация_Равновесная_Модель\\визуальзация_измерений\\measurements.txt");
+	std::ofstream conversation_laws("/home/mask/windows/научка/результат_моделирования/measurements.txt");
+	
 	conversation_laws << std::fixed << std::setprecision(13) << sistem_t << " " << sistem_E << " " << sistem_P << " " << sistem_M << " " << sistem_E_k << " " << sistem_E_p << " " << std::endl;
 
 
 	//write execution time for initial calculating
-	std::ofstream time("C:\\Users\\mesho\\Desktop\\научка_2025_весна\\программная_реализация_Равновесная_Модель\\визуальзация_измерений\\time.txt");
+	//std::ofstream time("C:\\Users\\mesho\\Desktop\\научка_2025_весна\\программная_реализация_Равновесная_Модель\\визуальзация_измерений\\time.txt");
+	std::ofstream time("/home/mask/windows/научка/результат_моделирования/time.txt");
 	auto end = std::chrono::high_resolution_clock::now();
 	std::chrono::duration<double> elapsed = end - start;
 	time << elapsed.count()<<" "<<PPm::dt<<std::endl;
@@ -426,13 +439,37 @@ int main()
 	std::cout << "start calculating\n";
 	// HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE); //current simulate data
 	// COORD pos = { 0, 4 };
-
+	int save=0;
 	for (double t = PPm::t_0 + PPm::dt; t <= PPm::t_1; t += PPm::dt)
 	{
 		
 		//KDK(particles, 0, particles.size());
 		KDK_parallel(particles);
-		//set_dinamic_step(particles);
+		set_dinamic_step(particles);
+		if(PPm::dt<1e-8)
+		{
+			PPm::div=1000000;
+		}else if(PPm::dt<1e-7)
+		{
+			PPm::div=100000;
+		}else if(PPm::dt<1e-6)
+		{
+			PPm::div=10000;
+		}else if(PPm::dt<1e-5)
+		{
+			PPm::div=1000;
+		}else if(PPm::dt<1e-4)
+		{
+			PPm::div=100;
+		}else if(PPm::dt<1e-3)
+		{
+			PPm::div=10;
+		}else if(PPm::dt<1e-2)
+		{
+			PPm::div=10;
+		}else{
+			PPm::div=1;
+		}
 		if (b % PPm::div == 0) {
 			sistem_E = 0;
 			sistem_P = 0;
@@ -452,13 +489,14 @@ int main()
 			auto stop = std::chrono::high_resolution_clock::now();
 			std::chrono::duration<double> el = stop - start;
 			time << el.count() << " " << PPm::dt << std::endl;
+			++save;
 		}
 		b++;
 		// SetConsoleCursorPosition(hConsole, pos);
 		auto end = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> elapsed = end - start;
-		std::cout << "\033[4;0H";
-		std::cout << std::setprecision(5) << "[(t_n,t_1): " << t << "/" << PPm::t_1 << ", dt = " << PPm::dt << ", Время выполнения: " << elapsed.count() << " секунд" << "]";
+		std::cout << "\033[1F";
+		std::cout << std::setprecision(5) << "[(t_n,t_1): " << t << "/" << PPm::t_1 << ", dt = " << PPm::dt << ", Время выполнения: " << elapsed.count() << " секунд," <<"saves: "<<save <<"]\n";
 	}
 	std::cout << "\nend calculating\n";
 	

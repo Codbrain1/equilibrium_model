@@ -10,7 +10,9 @@ def set_scientific_fontsize(ax, fontsize=30):
     
 def save_plot(fig, filename, show=False):
     """Унифицированная функция сохранения графиков"""
-    path = rf"C:\Users\mesho\Desktop\научка_2025_весна\программная_реализация_Равновесная_Модель\визуальзация_измерений\conversation_laws\{filename}"
+    #path = rf"C:\Users\mesho\Desktop\научка_2025_весна\программная_реализация_Равновесная_Модель\визуальзация_измерений\conversation_laws\{filename}"
+    path = rf"/home/mask/windows/научка/результат_моделирования/{filename}"
+    
     fig.savefig(path, dpi=300, bbox_inches='tight', facecolor='white')
     print(f"График сохранен: {path}")
     if show:
@@ -23,7 +25,9 @@ def visual_conversation_laws():
     t = []
     E_k = []
     E_p = [] 
-    with open(r"C:\Users\mesho\Desktop\научка_2025_весна\программная_реализация_Равновесная_Модель\визуальзация_измерений\measurements.txt", 'r') as stream:
+    
+    #with open(r"C:\Users\mesho\Desktop\научка_2025_весна\программная_реализация_Равновесная_Модель\визуальзация_измерений\measurements.txt", 'r') as stream:
+    with open(r"/home/mask/windows/научка/результат_моделирования/measurements.txt", 'r') as stream:
         while True:
             line = stream.readline()
             if not line:
@@ -140,22 +144,23 @@ def visual_dependens_dt_time():
     time = []
     dt = []
     ind=0
-    with open(r"C:\Users\mesho\Desktop\научка_2025_весна\программная_реализация_Равновесная_Модель\визуальзация_измерений\time.txt",'r') as stream:
-     while True:
-         line = stream.readline()
-         if not line:
-             break
-         parts = line.strip().split()
-         if(len(parts)!=2):
-            print("\033[3m\033[33m\033[41m{}\033[0m".format(f"Ошибка неправильная запись в файле time.txt, строка {ind}"))
-            continue
-         
-         _time = float(parts[0])
-         _dt = float(parts[1])
-         
-         time.append(_time)
-         dt.append(_dt)
-         ind=ind+1
+    #with open(r"C:\Users\mesho\Desktop\научка_2025_весна\программная_реализация_Равновесная_Модель\визуальзация_измерений\time.txt",'r') as stream:
+    with open(r"/home/mask/windows/научка/результат_моделирования/time.txt",'r') as stream:
+        while True:
+            line = stream.readline()
+            if not line:
+                break
+            parts = line.strip().split()
+            if(len(parts)!=2):
+                print("\033[3m\033[33m\033[41m{}\033[0m".format(f"Ошибка неправильная запись в файле time.txt, строка {ind}"))
+                continue
+            
+            _time = float(parts[0])
+            _dt = float(parts[1])
+            
+            time.append(_time)
+            dt.append(_dt)
+            ind=ind+1
          
         # Настройка глобального стиля
     plt.style.use('seaborn-v0_8')
@@ -202,7 +207,9 @@ def visual_dependens_dt_time():
     plt.tight_layout(pad=2.0)  # Увеличенный отступ
 
     # Сохранение с улучшенными параметрами
-    output_path = r"C:\Users\mesho\Desktop\научка_2025_весна\программная_реализация_Равновесная_Модель\визуальзация_измерений\conversation_laws\time.png"
+    #output_path = r"C:\Users\mesho\Desktop\научка_2025_весна\программная_реализация_Равновесная_Модель\визуальзация_измерений\conversation_laws\time.png"
+    output_path = r"/home/mask/windows/научка/результат_моделирования/time.png"
+    
     plt.savefig(output_path, 
                dpi=350,                  # Улучшенное качество
                bbox_inches='tight', 
@@ -227,7 +234,9 @@ def print_to_traectories_cadrs():
         'grid.color': 'gray'  # Серый цвет для сетки
     })
     # Чтение данных из файла
-    with open(r"C:\Users\mesho\Desktop\научка_2025_весна\программная_реализация_Равновесная_Модель\визуальзация_измерений\positions.txt", 'r') as stream:
+    #with open(r"C:\Users\mesho\Desktop\научка_2025_весна\программная_реализация_Равновесная_Модель\визуальзация_измерений\positions.txt", 'r') as stream:
+    with open(r"/home/mask/windows/научка/результат_моделирования/positions.txt", 'r') as stream:
+        
         N = int(stream.readline())
         time = []
         X = [[] for _ in range(N)]
@@ -290,7 +299,8 @@ def print_to_traectories_cadrs():
                 ax.set_ylabel("y", fontsize=30)
                 ax.grid(True)
                 plt.subplots_adjust(left=0.2, right=0.9, bottom=0.15, top=0.9)
-                output_path = r"C:\Users\mesho\Desktop\научка_2025_весна\программная_реализация_Равновесная_Модель\визуальзация_измерений\conversation_laws\traectories"+str(count)+".png"
+                #output_path = r"C:\Users\mesho\Desktop\научка_2025_весна\программная_реализация_Равновесная_Модель\визуальзация_измерений\conversation_laws\traectories"+str(count)+".png"
+                output_path = r"/home/mask/windows/научка/результат_моделирования/traectories"+str(count)+".png"
                 plt.savefig(output_path)
                 plt.close(fig)
                 #print(f"График сохранен: {output_path}")
@@ -311,10 +321,9 @@ def print_to_cadrs():
         'grid.color': 'gray'  # Серый цвет для сетки
     })
     # Чтение данных из файла
-    with open(r"C:\Users\mesho\Desktop\научка_2025_весна\программная_реализация_Равновесная_Модель\визуальзация_измерений\positions.txt", 'r') as stream:
+    #with open(r"C:\Users\mesho\Desktop\научка_2025_весна\программная_реализация_Равновесная_Модель\визуальзация_измерений\positions.txt", 'r') as stream:
+    with open(r"/home/mask/windows/научка/результат_моделирования/positions.txt", 'r') as stream: 
         N = int(stream.readline())
-        
-        
         while True:
             time = 0
             X = []
@@ -335,7 +344,7 @@ def print_to_cadrs():
                 X.append(x)
                 Y.append(y)
                 
-            div=10
+            div=80
             
             if count%div==0:
                 # Построение графика
@@ -361,7 +370,8 @@ def print_to_cadrs():
                 ax.set_ylabel("y", fontsize=30)
                 ax.grid(True)
                 plt.subplots_adjust(left=0.2, right=0.9, bottom=0.15, top=0.9)
-                output_path = r"C:\Users\mesho\Desktop\научка_2025_весна\программная_реализация_Равновесная_Модель\визуальзация_измерений\conversation_laws\traectories"+str(count)+".png"
+                #output_path = r"C:\Users\mesho\Desktop\научка_2025_весна\программная_реализация_Равновесная_Модель\визуальзация_измерений\conversation_laws\traectories"+str(count)+".png"
+                output_path = r"/home/mask/windows/научка/результат_моделирования/traectories"+str(count)+".png"
                 plt.savefig(output_path)
                 plt.close(fig)
                 #print(f"График сохранен: {output_path}")
@@ -369,7 +379,8 @@ def print_to_cadrs():
              
 def visual_traectories():
     # Чтение данных из файла
-    with open(r"C:\Users\mesho\Desktop\научка_2025_весна\программная_реализация_Равновесная_Модель\визуальзация_измерений\positions.txt", 'r') as stream:
+    #with open(r"C:\Users\mesho\Desktop\научка_2025_весна\программная_реализация_Равновесная_Модель\визуальзация_измерений\positions.txt", 'r') as stream:
+    with open(r"/home/mask/windows/научка/результат_моделирования/positions.txt", 'r') as stream:
         N = int(stream.readline())
         time = []
         X = [[] for _ in range(N)]
@@ -428,7 +439,8 @@ def visual_traectories():
         ax.set_ylabel("y", fontsize=30)
         ax.grid(True)
         plt.subplots_adjust(left=0.2, right=0.9, bottom=0.15, top=0.9)
-        output_path = r"C:\Users\mesho\Desktop\научка_2025_весна\программная_реализация_Равновесная_Модель\визуальзация_измерений\conversation_laws\traectories.png"
+        #output_path = r"C:\Users\mesho\Desktop\научка_2025_весна\программная_реализация_Равновесная_Модель\визуальзация_измерений\conversation_laws\traectories.png"
+        output_path = r"/home/mask/windows/научка/результат_моделирования/traectories.png"
         plt.savefig(output_path)
         plt.close(fig)
         print(f"График сохранен: {output_path}")
@@ -436,5 +448,5 @@ def visual_traectories():
 if __name__ == "__main__":
     #visual_conversation_laws()
     #visual_traectories()
-    print_to_cadrs()
     #visual_dependens_dt_time()
+    print_to_cadrs()
