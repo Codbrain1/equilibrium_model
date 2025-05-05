@@ -361,3 +361,7 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/equilibrium_model/.vscode
+/equilibrium_model.sln
+/equilibrium_model.sln
+*.out
