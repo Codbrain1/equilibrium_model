@@ -1,1 +1,0 @@
-/usr/bin/clang++ -g -Xlinker --dependency-file=CMakeFiles/n-body.dir/link.d "CMakeFiles/n-body.dir/main.cpp.o" "CMakeFiles/n-body.dir/functions.cpp.o" -o /home/mask/windows/научка/equilibrium_model/n-body  -latomic /usr/lib64/libomp.so /usr/lib64/libpthread.a
