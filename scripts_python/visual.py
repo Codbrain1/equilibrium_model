@@ -10,8 +10,8 @@ def set_scientific_fontsize(ax, fontsize=30):
     
 def save_plot(fig, filename, show=False):
     """Унифицированная функция сохранения графиков"""
-    #path = rf"C:\Users\mesho\Desktop\научка_2025_весна\программная_реализация_Равновесная_Модель\визуальзация_измерений\conversation_laws\{filename}"
-    path = rf"/home/mask/windows/научка/результат_моделирования/{filename}"
+    #path = rf"D:\научка\результат_моделирования\{filename}"
+    path = rf"../результат_моделирования/{filename}"
     
     fig.savefig(path, dpi=300, bbox_inches='tight', facecolor='white')
     print(f"График сохранен: {path}")
@@ -26,8 +26,8 @@ def visual_conversation_laws():
     E_k = []
     E_p = [] 
     
-    #with open(r"C:\Users\mesho\Desktop\научка_2025_весна\программная_реализация_Равновесная_Модель\визуальзация_измерений\measurements.txt", 'r') as stream:
-    with open(r"/home/mask/windows/научка/результат_моделирования/measurements.txt", 'r') as stream:
+    #with open(r"D:\научка\результат_моделирования\measurements.txt", 'r') as stream:
+    with open(r"../результат_моделирования/measurements.txt", 'r') as stream:
         while True:
             line = stream.readline()
             if not line:
@@ -113,7 +113,7 @@ def visual_conversation_laws():
     save_plot(fig4, "moment_impulse.png")
     
     # 2. График относительного изменения момента импульса
-    dLL_0 = [abs(Li-L[0])/(abs(L[0]) + 1e-16) for Li in L] 
+    dLL_0 = [abs(Li-L[0]+1e-16)/(abs(L[0]) + 1e-16) for Li in L] 
     fig2, ax2 = plt.subplots(**plot_params)
     ax2.semilogy(t, dLL_0, label="KDK", color='tab:red', linewidth=2)
     ax2.set_xlabel("Время, t", fontweight='bold')
@@ -144,8 +144,8 @@ def visual_dependens_dt_time():
     time = []
     dt = []
     ind=0
-    #with open(r"C:\Users\mesho\Desktop\научка_2025_весна\программная_реализация_Равновесная_Модель\визуальзация_измерений\time.txt",'r') as stream:
-    with open(r"/home/mask/windows/научка/результат_моделирования/time.txt",'r') as stream:
+    #with open(r"D:\научка\результат_моделирования\time.txt",'r') as stream:
+    with open(r"../результат_моделирования/time.txt",'r') as stream:
         while True:
             line = stream.readline()
             if not line:
@@ -207,8 +207,8 @@ def visual_dependens_dt_time():
     plt.tight_layout(pad=2.0)  # Увеличенный отступ
 
     # Сохранение с улучшенными параметрами
-    #output_path = r"C:\Users\mesho\Desktop\научка_2025_весна\программная_реализация_Равновесная_Модель\визуальзация_измерений\conversation_laws\time.png"
-    output_path = r"/home/mask/windows/научка/результат_моделирования/time.png"
+    #output_path = r"D:\научка\результат_моделирования\time.png"
+    output_path = r"../результат_моделирования/time.png"
     
     plt.savefig(output_path, 
                dpi=350,                  # Улучшенное качество
@@ -234,8 +234,8 @@ def print_to_traectories_cadrs():
         'grid.color': 'gray'  # Серый цвет для сетки
     })
     # Чтение данных из файла
-    #with open(r"C:\Users\mesho\Desktop\научка_2025_весна\программная_реализация_Равновесная_Модель\визуальзация_измерений\positions.txt", 'r') as stream:
-    with open(r"/home/mask/windows/научка/результат_моделирования/positions.txt", 'r') as stream:
+    #with open(r"D:\научка\результат_моделирования\positions.txt", 'r') as stream:
+    with open(r"../результат_моделирования/positions.txt", 'r') as stream:
         
         N = int(stream.readline())
         time = []
@@ -261,7 +261,7 @@ def print_to_traectories_cadrs():
                 X[i].append(x)
                 Y[i].append(y)
                 
-            div=10
+            div=100
             
             if count%div==0:
                 # Построение графика
@@ -299,8 +299,8 @@ def print_to_traectories_cadrs():
                 ax.set_ylabel("y", fontsize=30)
                 ax.grid(True)
                 plt.subplots_adjust(left=0.2, right=0.9, bottom=0.15, top=0.9)
-                #output_path = r"C:\Users\mesho\Desktop\научка_2025_весна\программная_реализация_Равновесная_Модель\визуальзация_измерений\conversation_laws\traectories"+str(count)+".png"
-                output_path = r"/home/mask/windows/научка/результат_моделирования/traectories"+str(count)+".png"
+                #output_path = r"D:\научка\результат_моделирования\traectories"+str(count)+".png"
+                output_path = r"../результат_моделирования/traectories"+str(count)+".png"
                 plt.savefig(output_path)
                 plt.close(fig)
                 #print(f"График сохранен: {output_path}")
@@ -321,8 +321,8 @@ def print_to_cadrs():
         'grid.color': 'gray'  # Серый цвет для сетки
     })
     # Чтение данных из файла
-    #with open(r"C:\Users\mesho\Desktop\научка_2025_весна\программная_реализация_Равновесная_Модель\визуальзация_измерений\positions.txt", 'r') as stream:
-    with open(r"/home/mask/windows/научка/результат_моделирования/positions.txt", 'r') as stream: 
+    #with open(r"D:\научка\результат_моделирования\positions.txt", 'r') as stream:
+    with open(r"../результат_моделирования/positions.txt", 'r') as stream: 
         N = int(stream.readline())
         while True:
             time = 0
@@ -370,8 +370,8 @@ def print_to_cadrs():
                 ax.set_ylabel("y", fontsize=30)
                 ax.grid(True)
                 plt.subplots_adjust(left=0.2, right=0.9, bottom=0.15, top=0.9)
-                #output_path = r"C:\Users\mesho\Desktop\научка_2025_весна\программная_реализация_Равновесная_Модель\визуальзация_измерений\conversation_laws\traectories"+str(count)+".png"
-                output_path = r"/home/mask/windows/научка/результат_моделирования/traectories"+str(count)+".png"
+                #output_path = r"D:\научка\результат_моделирования\traectories"+str(count)+".png"
+                output_path = f"../../результат_моделирования/traectories{str(count)}.png"
                 plt.savefig(output_path)
                 plt.close(fig)
                 #print(f"График сохранен: {output_path}")
@@ -379,8 +379,8 @@ def print_to_cadrs():
              
 def visual_traectories():
     # Чтение данных из файла
-    #with open(r"C:\Users\mesho\Desktop\научка_2025_весна\программная_реализация_Равновесная_Модель\визуальзация_измерений\positions.txt", 'r') as stream:
-    with open(r"/home/mask/windows/научка/результат_моделирования/positions.txt", 'r') as stream:
+    #with open(r"D:\научка\результат_моделирования\positions.txt", 'r') as stream:
+    with open(r"../результат_моделирования/positions.txt", 'r') as stream:
         N = int(stream.readline())
         time = []
         X = [[] for _ in range(N)]
@@ -439,14 +439,170 @@ def visual_traectories():
         ax.set_ylabel("y", fontsize=30)
         ax.grid(True)
         plt.subplots_adjust(left=0.2, right=0.9, bottom=0.15, top=0.9)
-        #output_path = r"C:\Users\mesho\Desktop\научка_2025_весна\программная_реализация_Равновесная_Модель\визуальзация_измерений\conversation_laws\traectories.png"
-        output_path = r"/home/mask/windows/научка/результат_моделирования/traectories.png"
+        #output_path = r"D:\научка\результат_моделирования\traectories.png"
+        output_path = r"../результат_моделирования/traectories.png"
         plt.savefig(output_path)
         plt.close(fig)
         print(f"График сохранен: {output_path}")
+def visual_centr_mass():
+    # Чтение данных из файла
+    #with open(r"D:\научка\результат_моделирования\centr_mass.txt", 'r') as stream:
+    with open(r"../результат_моделирования/centr_mass.txt", 'r') as stream:
+        time = []
+        X = []
+        Y = []
+        
+        while True:
+            line = stream.readline()
+            if not line:
+                break
+            parts = line.strip().split()
+            if len(parts) != 3:
+                raise ValueError(f"Ожидалось 3 значения для, получено {len(parts)}")
+            t = float(parts[0])   
+            x = float(parts[1])
+            y = float(parts[2])
+            time.append(t)
+            X.append(x)
+            Y.append(y)
+                
 
+        # Построение графика
+        fig, ax = plt.subplots(figsize=(12, 10))
+        plt.axis('equal')
+        # Настройки шрифтов
+        plt.rcParams.update({
+            'axes.labelsize': 30,
+            'xtick.labelsize': 30,
+            'ytick.labelsize': 30,
+        })
+
+        # Начальная точка (золотая)
+        ax.scatter(X[0], Y[0], s=20, c='red', linewidths=4)
+    
+        # Траектория
+        ax.plot(X, Y, linewidth=1)
+        
+        #конечная точка зеленая
+        ax.scatter([X[-1]], [Y[-1]], s=20, c='green', linewidths=4)
+        fig.suptitle(str(time[-1]))        
+        # Настройка научной нотации
+        ax.ticklabel_format(axis='both', style='sci', scilimits=(0,0))
+        set_scientific_fontsize(ax, 30)
+                
+        ax.set_xlabel("x", fontsize=30)
+        ax.set_ylabel("y", fontsize=30)
+        ax.grid(True)
+        plt.subplots_adjust(left=0.2, right=0.9, bottom=0.15, top=0.9)
+        #output_path = r"D:\научка\результат_моделирования\centr_mass.png"
+        output_path = r"../результат_моделирования/centr_mass.png"
+        plt.savefig(output_path)
+        #plt.show();
+        plt.close(fig)
+        print(f"График сохранен: {output_path}")
+        
+def visual_centr_mass_on_sistem():
+    # Построение графика
+    fig, ax = plt.subplots(figsize=(12, 10))
+    plt.axis('equal')
+    # Настройки шрифтов
+    plt.rcParams.update({
+        'axes.labelsize': 30,
+        'xtick.labelsize': 30,
+        'ytick.labelsize': 30,
+    })
+    
+     # Чтение данных из файла
+    #with open(r"D:\научка\результат_моделирования\positions.txt", 'r') as stream:
+    with open(r"../результат_моделирования/positions.txt", 'r') as stream:
+        N = int(stream.readline())
+        time = []
+        X = [[] for _ in range(N)]
+        Y = [[] for _ in range(N)]
+        X1 = [0]
+        Y1 = [0]
+        
+        while True:
+            line = stream.readline()
+            if not line:
+                break
+            t = float(line.strip())
+            time.append(t)
+            
+            for i in range(N):
+                parts = stream.readline().strip().split()
+                if len(parts) != 6:
+                    raise ValueError(f"Ожидалось 6 значений для объекта {i}, получено {len(parts)}")
+                
+                x = float(parts[0])
+                y = float(parts[1])
+                X[i].append(x)
+                Y[i].append(y)
+        
+      
+
+        # Траектории
+        for i in range(N):
+            ax.plot(X[i], Y[i], linewidth=1)
+    
+        # Конечные точки (синие)
+        for i in range(0, N):
+            if X[i] and Y[i]:
+                ax.scatter([X[i][-1]], [Y[i][-1]], s=1.5, c='blue', linewidths=1.5)
+                
+        
+     # Чтение данных из файла
+    #with open(r"D:\научка\результат_моделирования\centr_mass.txt", 'r') as stream:
+    with open(r"../результат_моделирования/centr_mass.txt", 'r') as stream:
+        time = []
+        X = []
+        Y = []
+        
+        while True:
+            line = stream.readline()
+            if not line:
+                break
+            parts = line.strip().split(' ')
+            if len(parts) != 3:
+                raise ValueError(f"Ожидалось 3 значения, получено {len(parts)}")
+            t = float(parts[0])   
+            x = float(parts[1])
+            y = float(parts[2])
+            time.append(t)
+            X.append(x)
+            Y.append(y)
+                
+
+        # Начальная точка (зеленая)
+        ax.scatter(X[0], Y[0], s=20, c='green', linewidths=4)
+    
+        # Траектория
+        ax.plot(X, Y, linewidth=1)
+        
+        #конечная точка (красная)
+        ax.scatter([X[-1]], [Y[-1]], s=20, c='red', linewidths=4)
+             
+        # Настройка научной нотации
+        ax.ticklabel_format(axis='both', style='sci', scilimits=(0,0))
+        set_scientific_fontsize(ax, 30)
+                
+        ax.set_xlabel("x", fontsize=30)
+        ax.set_ylabel("y", fontsize=30)
+        ax.grid(True)
+        plt.subplots_adjust(left=0.2, right=0.9, bottom=0.15, top=0.9)
+     
+        fig.suptitle(str(time[-1]))        
+        #output_path = r"D:\научка\результат_моделирования\centr_mass_on_sistem.png"
+        output_path = r"../результат_моделирования/centr_mass_on_sistem.png"
+        plt.savefig(output_path)
+        #plt.show();
+        plt.close(fig)
+        print(f"График сохранен: {output_path}")
+        
 if __name__ == "__main__":
-    #visual_conversation_laws()
-    #visual_traectories()
-    #visual_dependens_dt_time()
-    print_to_cadrs()
+    visual_conversation_laws()
+    visual_traectories()
+    visual_dependens_dt_time()
+    visual_centr_mass_on_sistem()
+    visual_centr_mass()
+    #print_to_traectories_cadrs()

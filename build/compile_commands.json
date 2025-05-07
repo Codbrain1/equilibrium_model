@@ -1,0 +1,14 @@
+[
+{
+  "directory": "/home/mask/windows/научка/equilibrium_model/build",
+  "command": "/usr/bin/clang++  -I/home/mask/windows/научка/equilibrium_model/include -g -std=c++20 -march=native -O3 -g -fopenmp=libomp -o CMakeFiles/n-body.dir/main.cpp.o -c /home/mask/windows/научка/equilibrium_model/main.cpp",
+  "file": "/home/mask/windows/научка/equilibrium_model/main.cpp",
+  "output": "CMakeFiles/n-body.dir/main.cpp.o"
+},
+{
+  "directory": "/home/mask/windows/научка/equilibrium_model/build",
+  "command": "/usr/bin/clang++  -I/home/mask/windows/научка/equilibrium_model/include -g -std=c++20 -march=native -O3 -g -fopenmp=libomp -o CMakeFiles/n-body.dir/functions.cpp.o -c /home/mask/windows/научка/equilibrium_model/functions.cpp",
+  "file": "/home/mask/windows/научка/equilibrium_model/functions.cpp",
+  "output": "CMakeFiles/n-body.dir/functions.cpp.o"
+}
+]

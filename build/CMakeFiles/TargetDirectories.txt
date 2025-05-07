@@ -1,0 +1,3 @@
+/home/mask/windows/научка/equilibrium_model/build/CMakeFiles/n-body.dir
+/home/mask/windows/научка/equilibrium_model/build/CMakeFiles/edit_cache.dir
+/home/mask/windows/научка/equilibrium_model/build/CMakeFiles/rebuild_cache.dir

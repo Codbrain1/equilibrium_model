@@ -7,7 +7,7 @@ namespace Particle_Particle_model {
 	{
 	public:
 
-		double m, E;
+		long double m, E;
 		vec r, v, F, L, P, a;
 		// TODO: add function
 		Particle():
@@ -16,7 +16,7 @@ namespace Particle_Particle_model {
 			F(0, 0, 0), 
 			L(0, 0, 0), 
 			P(0, 0, 0),
-			a(0,0,0),
+			a(0, 0, 0),
 			m(M/N),
 			E(0)
 		{}
@@ -27,22 +27,14 @@ namespace Particle_Particle_model {
 	inline vec F(const Particle& p1, const Particle& p2)
 	{
 		const vec r_ij = p2.r - p1.r;
-		const double r =sqrt(r_ij.module_2()+r_c);
+		const long double r =sqrt(r_ij.module_2()+r_c);
 		return  r_ij*(G * (p2.m*p1.m) / (r*r*r));
 	}
 
 	inline vec calc_f(const Particle& p1, const Particle& p2)
 	{
 		const vec r_ij = p2.r - p1.r;
-		const double r = sqrt(r_ij.module_2() + r_c);
+		const long double r = sqrt(r_ij.module_2() + r_c);
 		return  r_ij * (G * (p2.m) / (r * r * r));
-	}
-	/// <summary>
-	/// функция вычисляющая поверхностную плотность в тонком диске, определена в полярных координатах
-	/// </summary>
-	/// <param name="r"></param>
-	/// <returns></returns>
-	//double sigma(double r) { return sigma_0 *r_alpha* r_alpha /r; }
-
-	double sigma_exp(double r) { return sigma_0 * exp(-r / r_alpha); }
+	}	
 }
