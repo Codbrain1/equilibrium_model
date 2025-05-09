@@ -1,4 +1,5 @@
 #include"header.h"
+#include<algorithm>
 
 //вычисление поверхностной плотности диска
 //long double sigma(long double r) { return sigma_0 *r_alpha* r_alpha /r; }
@@ -251,32 +252,38 @@ void calculate_conversation_laws(std::vector<PPm::Particle>& ps, int i_0, int i_
 
 //вычисление шага интегрирования (без ограничений, последовательно)
 //TODO: проверит на корректность работы
-void set_dinamic_step_temp(std::vector<PPm::Particle>& ps)
-{
-	long double min_dist = (ps[0].r - ps[1].r).module();
-	long double max_a = ps[0].a.module();
+void set_dynamic_step_parallel_temp(std::vector<PPm::Particle>& ps) {
+    if (ps.size() < 2) return;  // Недостаточно частиц для вычисления расстояний
 
-	// Находим минимальное расстояние между частицами и максимальное ускорение
-	for (int i = 0; i < ps.size(); i++)
-	{
-		for (int j = i + 1; j < ps.size(); j++)
-		{
-			long double dist = (ps[i].r - ps[j].r).module();
-			if (dist < min_dist)
-				min_dist = dist;
-		}
-		long double a = ps[i].a.module();
-		if (max_a < a)
-			max_a = a;
-	}
+    long double min_dist = std::numeric_limits<long double>::max();
+    long double max_a = 0.0;
 
-	// Вычисляем новый шаг интегрирования без ограничений на изменение
-	long double new_dt = std::min(0.01 * min_dist, 0.1 / sqrt(max_a));
+    // Находим минимальное расстояние и максимальное ускорение
+    #pragma omp parallel for reduction(min: min_dist) reduction(max: max_a)
+    for (int i = 0; i < ps.size(); i++) {
+        for (int j = i + 1; j < ps.size(); j++) {
+            long double dist = (ps[i].r - ps[j].r).module();
+            if (dist < min_dist) min_dist = dist;
+        }
+        long double a = ps[i].a.module();
+        if (a > max_a) max_a = a;
+    }
 
-	// Применяем только глобальные ограничения (min_dt и max_dt)
-	const long double min_dt = PPm::mindt;
-	const long double max_dt = PPm::maxdt;
-	PPm::dt = std::max(min_dt, std::min(new_dt, max_dt));
+    // Вычисляем новый шаг на основе критериев:
+    // 1. Шаг должен быть достаточно мал, чтобы частицы не проскакивали друг друга (0.01 * min_dist)
+    // 2. Шаг должен учитывать ускорение (0.1 / sqrt(max_a)), чтобы сохранять точность
+    long double new_dt;
+    if (max_a == 0.0) {
+        new_dt = 0.0001 * min_dist;  // Если ускорений нет, ориентируемся только на расстояния
+    } else {
+        new_dt = std::min(0.0001 * min_dist, 0.001 / std::sqrt(max_a));
+    }
+
+    // Ограничиваем изменение шага: не более чем в 10 раз за один пересчёт
+    new_dt = std::clamp(new_dt, PPm::dt / 20.0, PPm::dt * 20.0);
+
+    // Гарантируем, что шаг не выйдет за глобальные границы [mindt, maxdt]
+    PPm::dt = std::clamp(new_dt, PPm::mindt, PPm::maxdt);
 }
 //вычисление шага интегрированая(ограничение - изменение не более чем в 2 раза за шаг, последовательно)
 //TODO: проверить на корректность работу
@@ -322,7 +329,7 @@ void set_dinamic_step_parallel(std::vector<PPm::Particle>& ps)
 			max_a = a;
 	}
 	long double new_dt = (std::min)(0.01 * min_dist, 0.1 / sqrt(max_a));
-	new_dt = (std::max)(PPm::dt/10.0, (std::min)(10.0 * PPm::dt, new_dt));
+	new_dt = std::max(PPm::dt/10.0, std::min(10.0 * PPm::dt, new_dt));
 	const long double min_dt = PPm::mindt;
 	const long double max_dt = PPm::maxdt;
 	PPm::dt = (std::max)(min_dt, (std::min)(new_dt, max_dt));
