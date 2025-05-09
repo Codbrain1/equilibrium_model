@@ -27,7 +27,7 @@ target_include_directories(n-body PRIVATE
 # Настройки компиляции
 target_compile_options(n-body PRIVATE
     -march=native
-    -O3
+    -O2
     -g
 )
 

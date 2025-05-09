@@ -77,7 +77,7 @@ int main()
 		}
 		//KDK(particles, 0, particles.size());
 		KDK_parallel(particles);
-		set_dinamic_step_parallel(particles);
+		set_dynamic_step_parallel_temp(particles);
 		if (PPm::dt < 1e-8)
 		{
 			PPm::div = 1000000;

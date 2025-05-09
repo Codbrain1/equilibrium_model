@@ -41,7 +41,7 @@ vec calculate_centr_mass(std::vector<PPm::Particle>& ps, int i_0, int i_1);
 
 void calculate_conversation_laws(std::vector<PPm::Particle>& ps, int i_0, int i_1);
 
-void set_dinamic_step_temp(std::vector<PPm::Particle>& ps);
+void set_dynamic_step_parallel_temp(std::vector<PPm::Particle>& ps);
 
 void set_dinamic_step(std::vector<PPm::Particle>& ps);
 

@@ -13,7 +13,7 @@ namespace Particle_Particle_model {
 	inline int div = 1; //отвечает за частоту записи данных в файл 1=каждая итерация
 	inline long double dt = 0.00001; //шаг времени
 	inline long double mindt = 1e-15;
-	inline long double maxdt = 1e-5;
+	inline long double maxdt = 0.01;
 	inline long double R_max = 1;//максимальный радиус
 	inline long double M = 1;//общая масса частиц
 	inline long double r_0 = 0; //начальный радиус
