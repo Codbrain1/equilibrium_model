@@ -20,7 +20,7 @@ int main()
 
 	//set_exponential_disk(particles,0,PPm::N/2,-1,0);
 	//set_exponential_disk(particles,PPm::N/2,PPm::N,1,0);
-	set_initial_circle(particles);	
+	set_bruk_orbit(particles);	
 	std::cout << "set initial conditions\n";
 
 	calculate_conversation_laws(particles, 0, particles.size());

@@ -55,12 +55,12 @@ def visual_conversation_laws():
    # Глобальные настройки стиля
     plt.style.use('seaborn-v0_8')
     mpl.rcParams.update({
-        'axes.titlesize': 24,
-        'axes.labelsize': 22,
-        'xtick.labelsize': 18,
-        'ytick.labelsize': 18,
-        'legend.fontsize': 20,
-        'figure.titlesize': 26,
+        'axes.titlesize': 32,
+        'axes.labelsize': 30,
+        'xtick.labelsize': 30,
+        'ytick.labelsize': 30,
+        'legend.fontsize': 30,
+        'figure.titlesize': 30,
         'font.family': 'serif',
         'grid.alpha': 0.2,  # Более светлая сетка
         'grid.linestyle': '--',
@@ -84,7 +84,7 @@ def visual_conversation_laws():
     save_plot(fig1, "energy.png")
 
     # 2. График относительного изменения энергии
-    dEE_0 = [abs(Ei-E[0])/abs(E[0]) for Ei in E]
+    dEE_0 = [abs(Ei-E[0]+1e-16)/abs(E[0]) for Ei in E]
     fig2, ax2 = plt.subplots(**plot_params)
     ax2.semilogy(t, dEE_0, label="KDK", color='tab:red', linewidth=2)
     ax2.set_xlabel("Время, t", fontweight='bold')
@@ -165,12 +165,12 @@ def visual_dependens_dt_time():
         # Настройка глобального стиля
     plt.style.use('seaborn-v0_8')
     mpl.rcParams.update({
-        'axes.titlesize': 24,
-        'axes.labelsize': 22,
-        'xtick.labelsize': 18,
-        'ytick.labelsize': 18,
-        'legend.fontsize': 20,
-        'figure.titlesize': 26,
+        'axes.titlesize': 32,
+        'axes.labelsize': 30,
+        'xtick.labelsize': 30,
+        'ytick.labelsize': 30,
+        'legend.fontsize': 30,
+        'figure.titlesize': 30,
         'font.family': 'serif',
         'grid.alpha': 0.2,  # Более светлая сетка
         'grid.linestyle': '--',
@@ -222,12 +222,12 @@ def print_to_traectories_cadrs():
     count=0 
     plt.style.use('seaborn-v0_8')
     mpl.rcParams.update({
-        'axes.titlesize': 24,
-        'axes.labelsize': 22,
-        'xtick.labelsize': 18,
-        'ytick.labelsize': 18,
-        'legend.fontsize': 20,
-        'figure.titlesize': 26,
+        'axes.titlesize': 32,
+        'axes.labelsize': 30,
+        'xtick.labelsize': 30,
+        'ytick.labelsize': 30,
+        'legend.fontsize': 30,
+        'figure.titlesize': 30,
         'font.family': 'serif',
         'grid.alpha': 0.2,  # Более светлая сетка
         'grid.linestyle': '--',
@@ -309,12 +309,12 @@ def print_to_cadrs():
     count=0 
     plt.style.use('seaborn-v0_8')
     mpl.rcParams.update({
-        'axes.titlesize': 24,
-        'axes.labelsize': 22,
-        'xtick.labelsize': 18,
-        'ytick.labelsize': 18,
-        'legend.fontsize': 20,
-        'figure.titlesize': 26,
+        'axes.titlesize': 32,
+        'axes.labelsize': 30,
+        'xtick.labelsize': 30,
+        'ytick.labelsize': 30,
+        'legend.fontsize': 30,
+        'figure.titlesize': 30,
         'font.family': 'serif',
         'grid.alpha': 0.2,  # Более светлая сетка
         'grid.linestyle': '--',
@@ -426,7 +426,7 @@ def visual_traectories():
         # Конечные точки (зеленые)
         for i in range(0, N):
             if X[i] and Y[i]:
-                ax.scatter([X[i][-1]], [Y[i][-1]], s=1.5, c='blue', linewidths=1.5)
+                ax.scatter([X[i][-1]], [Y[i][-1]], s=100, c='blue', linewidths=1.5)
                 
         # ax.set_xlim(-5, 5)  
         # ax.set_ylim(-5, 5)

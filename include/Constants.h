@@ -9,9 +9,9 @@ namespace Particle_Particle_model {
 	//initial conditions:
 	//======================================================================
 	const int N = 3; //число частиц
-	const long double t_0 = 0, t_1 = 1000; //начальное и конеченое время
+	const long double t_0 = 0, t_1 = 1000; //начальное и конеченое врем
 	inline int div = 1; //отвечает за частоту записи данных в файл 1=каждая итерация
-	inline long double dt = 0.00001; //шаг времени
+	inline long double dt = 0.0001; //шаг времени
 	inline long double mindt = 1e-15;
 	inline long double maxdt = 0.01;
 	inline long double R_max = 1;//максимальный радиус

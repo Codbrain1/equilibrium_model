@@ -416,3 +416,30 @@ void set_initial_circle(std::vector<PPm::Particle>& ps)
 		i.v.z = 0;
 	}
 }
+
+void set_bruk_orbit(std::vector<PPm::Particle> &ps)
+{
+	if(ps.size()!=3)
+	{
+		throw "Error size mass";
+	}else{
+		ps[0].r.x  = 0.8733047091;
+		ps[1].r.x = -0.6254030288;
+		ps[2].r.x = -0.2479016803;
+		ps[0].r.y = 0;
+		ps[1].r.y = 0;
+		ps[1].r.y = 0;
+		ps[0].v.x = 0;
+		ps[1].v.x = 0;
+		ps[2].v.x = 0;
+		ps[0].v.y = 1.010776444;
+		ps[1].v.y = -1.683353346;
+		ps[2].v.y = 0.6725769022;
+		ps[0].m=1;
+		ps[1].m=1;
+		ps[2].m=1;
+		calc_forces(ps, 0, ps.size());
+		for (auto& i : ps)
+			i.Evaluate_a();
+	}
+}

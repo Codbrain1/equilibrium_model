@@ -50,3 +50,5 @@ void set_dinamic_step_parallel(std::vector<PPm::Particle>& ps);
 void set_exponential_disk(std::vector<PPm::Particle>& ps, int i_0, int i_1, long double _x_, long double _y_);
 
 void set_initial_circle(std::vector<PPm::Particle>& ps);
+
+void set_bruk_orbit(std::vector<PPm::Particle>& ps);
