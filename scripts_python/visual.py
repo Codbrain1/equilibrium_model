@@ -194,13 +194,11 @@ def visual_dependens_dt_time():
 
     # Оптимизированная легенда
     legend = ax1.legend(
-        loc='upper right',        # Новое расположение
-        frameon=True,
-        framealpha=0.9,
-        edgecolor='gray',        # Более светлая граница
-        facecolor='whitesmoke',  # Светлый фон
-        borderpad=1.2,
-        shadow=True              # Легкая тень для объема
+    loc='upper right',     
+    framealpha=0.0,        # Полная прозрачность фона (0.0 вместо 0.9)
+    edgecolor='gray',      # Цвет границы (если framealpha > 0)
+    borderpad=1.2,
+    shadow=True            # Тень (будет видна, если framealpha > 0)
     )
 
     # Настройка расположения графика
@@ -261,7 +259,7 @@ def print_to_traectories_cadrs():
                 X[i].append(x)
                 Y[i].append(y)
                 
-            div=100
+            div=10
             
             if count%div==0:
                 # Построение графика
@@ -600,9 +598,9 @@ def visual_centr_mass_on_sistem():
         print(f"График сохранен: {output_path}")
         
 if __name__ == "__main__":
-    visual_conversation_laws()
-    visual_traectories()
+    #visual_conversation_laws()
+   #visual_traectories()
     visual_dependens_dt_time()
-    visual_centr_mass_on_sistem()
-    visual_centr_mass()
-    #print_to_traectories_cadrs()
+    #visual_centr_mass_on_sistem()
+    #visual_centr_mass()
+    print_to_traectories_cadrs()
