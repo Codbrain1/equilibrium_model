@@ -1,12 +1,12 @@
 #include "header.h"
 
-long double sistem_E=0;
-vec sistem_P= vec(0, 0, 0);;
-vec sistem_L= vec(0, 0, 0);;
-long double sistem_t=0;
-long double sistem_E_k=0;
-long double sistem_E_p=0;
-vec sistem_R=  vec(0, 0, 0);
+long double sistem_E=0.0L;
+vec sistem_P= vec(0.0L, 0.0L, 0.0L);;
+vec sistem_L= vec(0.0L, 0.0L, 0.0L);;
+long double sistem_t=0.0L;
+long double sistem_E_k=0.0L;
+long double sistem_E_p=0.0L;
+vec sistem_R=  vec(0.0L, 0.0L, 0.0L);
 
 int main()
 {
@@ -20,7 +20,7 @@ int main()
 
 	//set_exponential_disk(particles,0,PPm::N/2,-1,0);
 	//set_exponential_disk(particles,PPm::N/2,PPm::N,1,0);
-	set_bruk_orbit(particles);	
+	set_initial_circle(particles);
 	std::cout << "set initial conditions\n";
 
 	calculate_conversation_laws(particles, 0, particles.size());
@@ -35,7 +35,7 @@ int main()
 	//write initial centr mass into file
 	std::ofstream centr_mass("../результат_моделирования/centr_mass.txt");
 
-	centr_mass<<std::setprecision(15) << sistem_t << " " << sistem_R.x << " " << sistem_R.y << " " << std::endl;
+	centr_mass<<std::setprecision(30) << sistem_t << " " << sistem_R.x << " " << sistem_R.y << " " << std::endl;
 
 	//write initial positions into file
 	std::ofstream positions("../результат_моделирования/positions.txt");
@@ -44,13 +44,13 @@ int main()
 	positions << PPm::t_0 << std::endl;
 	for (auto& p : particles)
 	{
-		positions << std::setprecision(15) << p.r.x << " " << p.r.y << " " << p.r.z << " " << p.v.x << " " << p.v.y << " " << p.v.z << std::endl;
+		positions << std::setprecision(30) << p.r.x << " " << p.r.y << " " << p.r.z << " " << p.v.x << " " << p.v.y << " " << p.v.z << std::endl;
 	}
 
 	//write initial conversation laws into file
 	std::ofstream conversation_laws("../результат_моделирования/measurements.txt");
 
-	conversation_laws << std::fixed << std::setprecision(15) << sistem_t << " " << sistem_E << " " << sistem_P.module() << " " << sistem_L.module() << " " << sistem_E_k << " " << sistem_E_p << " " << std::endl;
+	conversation_laws << std::fixed << std::setprecision(30) << sistem_t << " " << sistem_E << " " << sistem_P.module() << " " << sistem_L.module() << " " << sistem_E_k << " " << sistem_E_p << " " << std::endl;
 
 
 	//write execution time for initial calculating
@@ -68,41 +68,41 @@ int main()
 	{
 		#pragma omp single
 		{
-			sistem_E_k = 0;
-			sistem_E_p = 0;
-			sistem_E = 0;
-			sistem_P = vec(0, 0, 0);
-			sistem_L = vec(0, 0, 0);
-			sistem_R = vec(0, 0, 0);
+			sistem_E_k = 0.0L;
+			sistem_E_p = 0.0L;
+			sistem_E = 0.0L;
+			sistem_P = vec(0.0L, 0.0L, 0.0L);
+			sistem_L = vec(0.0L, 0.0L, 0.0L);
+			sistem_R = vec(0.0L, 0.0L, 0.0L);
 		}
 		//KDK(particles, 0, particles.size());
 		KDK_parallel(particles);
 		set_dynamic_step_parallel_temp(particles);
-		if (PPm::dt < 1e-8)
+		if (PPm::dt < 1e-8L)
 		{
 			PPm::div = 1000000;
 		}
-		else if (PPm::dt < 1e-7)
+		else if (PPm::dt < 1e-7L)
 		{
 			PPm::div = 100000;
 		}
-		else if (PPm::dt < 1e-6)
+		else if (PPm::dt < 1e-6L)
 		{
 			PPm::div = 10000;
 		}
-		else if (PPm::dt < 1e-5)
+		else if (PPm::dt < 1e-5L)
 		{
 			PPm::div = 1000;
 		}
-		else if (PPm::dt < 1e-4)
+		else if (PPm::dt < 1e-4L)
 		{
 			PPm::div = 1000;
 		}
-		else if (PPm::dt < 1e-3)
+		else if (PPm::dt < 1e-3L)
 		{
 			PPm::div = 1000;
 		}
-		else if (PPm::dt < 1e-2)
+		else if (PPm::dt < 1e-2L)
 		{
 			PPm::div = 100;
 		}
@@ -117,11 +117,11 @@ int main()
 			positions << t << std::endl;
 			for (auto& p : particles)
 			{
-				positions << std::setprecision(15) << p.r.x << " " << p.r.y << " " << p.r.z << " " << p.v.x << " " << p.v.y << " " << p.v.z << std::endl;
+				positions << std::setprecision(30) << p.r.x << " " << p.r.y << " " << p.r.z << " " << p.v.x << " " << p.v.y << " " << p.v.z << std::endl;
 			}
 
-			conversation_laws << std::fixed << std::setprecision(15) << sistem_t << " " << sistem_E << " " << sistem_P.module() << " " << sistem_L.module() << " " << sistem_E_k << " " << sistem_E_p << " " << std::endl;
-			centr_mass <<std::setprecision(15)<< sistem_t << " " << sistem_R.x << " " << sistem_R.y << " " << std::endl;
+			conversation_laws << std::fixed << std::setprecision(30) << sistem_t << " " << sistem_E << " " << sistem_P.module() << " " << sistem_L.module() << " " << sistem_E_k << " " << sistem_E_p << " " << std::endl;
+			centr_mass <<std::setprecision(30)<< sistem_t << " " << sistem_R.x << " " << sistem_R.y << " " << std::endl;
 
 			auto stop = std::chrono::high_resolution_clock::now();
 			std::chrono::duration<long double> el = stop - start;
@@ -129,7 +129,6 @@ int main()
 			++save;
 		}
 		b++;
-		// SetConsoleCursorPosition(hConsole, pos);
 		auto end = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<long double> elapsed = end - start;
 		std::cout << "\033[1F";

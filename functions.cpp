@@ -6,14 +6,14 @@
 long double sigma_exp(long double r) 
 { 
     using namespace PPm;
-    return sigma_0 * exp(-r / r_alpha); 
+    return sigma_0 * expl(-r / r_alpha); 
 }
 //случайное числа в диапазоне [a,b] с равномерной вероятностью
 long double random(long double beg, long double end)
 {
 	std::random_device rd;
 	std::mt19937 gen(rd());
-	std::uniform_real_distribution<> dist(beg, end);
+	std::uniform_real_distribution<long double> dist(beg, end);
 	return dist(gen);
 }
 //вычисление сил для всех частиц
@@ -21,7 +21,7 @@ void calc_forces(std::vector<PPm::Particle>& ps, int i_0, int i_1)
 {
 	for (int i = i_0; i < i_1; i++)
 	{
-		ps[i].F = vec(0, 0, 0);
+		ps[i].F = vec(0.0L, 0.0L, 0.0L);
 	}
 
 	for (int i = i_0; i < i_1; i++)
@@ -30,7 +30,7 @@ void calc_forces(std::vector<PPm::Particle>& ps, int i_0, int i_1)
 		{
 			if (i != j)
 			{
-				auto F_ij = PPm::F(ps[i], ps[j]);
+				vec F_ij = PPm::F(ps[i], ps[j]);
 				ps[i].F = ps[i].F + F_ij;
 				ps[j].F = ps[j].F - F_ij;
 			}
@@ -43,13 +43,13 @@ void calc_acceleration_asinc(std::vector<PPm::Particle>& ps, int i_0, int i_1)
 	#pragma omp parallel for
 	for (int i = i_0; i < i_1; i++)
 	{
-		ps[i].a = vec(0, 0, 0);
+		ps[i].a = vec(0.0L, 0.0L, 0.0L);
 
 		for (int j = 0; j < ps.size(); j++)
 		{
 			if (i != j)
 			{
-				auto f_ij = PPm::calc_f(ps[i], ps[j]);
+				vec f_ij = PPm::calc_f(ps[i], ps[j]);
 				ps[i].a = ps[i].a + f_ij;
 			}
 		}
@@ -57,8 +57,6 @@ void calc_acceleration_asinc(std::vector<PPm::Particle>& ps, int i_0, int i_1)
 }
 //метод интегрирования Kick-drift-kikck паралельно на процессоре
 void KDK_parallel(std::vector<PPm::Particle>& ps) {
-	// Проверка на корректность количества потоков
-
 	const int N = ps.size();
 	std::vector<vec> u_i(N);  // Сохраняем начальные скорости для всех частиц
 
@@ -66,7 +64,7 @@ void KDK_parallel(std::vector<PPm::Particle>& ps) {
 	#pragma omp parallel for 
 	for (int i = 0; i < N; ++i) {
 		u_i[i] = ps[i].v + ps[i].a * PPm::dt;                     // Kick (обновление скорости)
-		ps[i].r = ps[i].r + (ps[i].v + u_i[i]) * 0.5 * PPm::dt;  // Drift (обновление координат)
+		ps[i].r = ps[i].r + (ps[i].v + u_i[i]) * 0.5L * PPm::dt;  // Drift (обновление координат)
 	}
 
 	calc_acceleration_asinc(ps, 0, N);
@@ -74,18 +72,18 @@ void KDK_parallel(std::vector<PPm::Particle>& ps) {
 	// Финальное обновление скоростей (Kick)
 	#pragma omp parallel for 
 	for (int i = 0; i < N; i++) {
-		ps[i].v = (ps[i].v + u_i[i]) * 0.5 + ps[i].a * PPm::dt * 0.5;
+		ps[i].v = (ps[i].v + u_i[i]) * 0.5L + ps[i].a * PPm::dt * 0.5L;
 	}
 }
 //метод интегрирования Kick-drift-kikck
 void KDK(std::vector<PPm::Particle>& ps, int i_0, int i_1)
 {
-	std::vector<vec> u_i(ps.size(), vec(0, 0, 0));
+	std::vector<vec> u_i(ps.size(), vec(0.0L, 0.0L, 0.0L));
 	for (int i = i_0; i < i_1; i++) 
 	{
 		u_i[i - i_0] = ps[i].v;
 		ps[i].v = ps[i].v + ps[i].a * PPm::dt; //Kick (обновление скорости)
-		ps[i].r = ps[i].r + (ps[i].v + u_i[i - i_0]) * PPm::dt * 0.5;//drift (обновление позиции)
+		ps[i].r = ps[i].r + (ps[i].v + u_i[i - i_0]) * PPm::dt * 0.5L;//drift (обновление позиции)
 	}
 	calc_forces(ps, 0, ps.size());
 	for (auto& p : ps)
@@ -93,7 +91,7 @@ void KDK(std::vector<PPm::Particle>& ps, int i_0, int i_1)
 
 	for (int i = 0; i < ps.size(); i++)
 	{
-		ps[i].v = (ps[i].v + u_i[i]) * 0.5 + ps[i].a * 0.5 * PPm::dt; //kick финальное обновление скорости
+		ps[i].v = (ps[i].v + u_i[i]) * 0.5L + ps[i].a * 0.5L * PPm::dt; //kick финальное обновление скорости
 	}
 }
 //TODO: Rungekutta4 находится в разработке
@@ -165,35 +163,41 @@ void calculate_conversation_laws_parallel(std::vector<PPm::Particle>& ps, int i_
 {
 #pragma omp single
 	{
-		sistem_E_k = 0; //кинетическая энергия
-		sistem_E_p = 0; //потенциальная энергия
-		sistem_E = 0; //полная энергия
-		sistem_P = vec(0, 0, 0); //импульс
-		sistem_L = vec(0, 0, 0); //момент импульса
+		sistem_E_k = 0.0L; //кинетическая энергия
+		sistem_E_p = 0L; //потенциальная энергия
+		sistem_E = 0.0L; //полная энергия
+		sistem_P = vec(0.0L, 0.0L, 0.0L); //импульс
+		sistem_L = vec(0.0L, 0.0L, 0.0L); //момент импульса
 	}
-	long double local_E_k = 0, local_E_p = 0;
-	vec local_L = vec(0, 0, 0);
-	vec local_P = vec(0, 0, 0);
+	long double local_E_k = 0.0L, local_E_p = 0.0L;
+	long double local_Px = 0.0L, local_Py = 0.0L, local_Pz = 0.0L;
+    long double local_Lx = 0.0L, local_Ly = 0.0L, local_Lz = 0.0L;
 
-#pragma omp parallel for reduction(+:local_E_k, local_E_p, local_P, local_L)
+	#pragma omp parallel for reduction(+:local_E_k, local_E_p, local_Px, local_Py, local_Pz, local_Lx, local_Ly, local_Lz)
 	for (int i = i_0; i < i_1; i++)
 	{
-		auto E_k = 0.5 * ps[i].m * ps[i].v.module_2();
+		long double E_k = 0.5L * ps[i].m * ps[i].v.module_2();
 
 		ps[i].P = ps[i].v * ps[i].m;					// вычисляем импульс
 		ps[i].L = ps[i].r * ps[i].P;					// вычисляем момент импульса
 
 		local_E_k += E_k;
-
+		
 		for (int j = i + 1; j < ps.size(); j++) { //вычисляем потенциальную энергию
 			vec r_ij = ps[j].r - ps[i].r;
-			long double r = sqrt(r_ij.module_2() + PPm::r_c);
-			auto E_p = -PPm::G * ps[i].m * ps[j].m / r;
+			long double r = sqrtl(r_ij.module_2() + PPm::r_c);
+			long double E_p = -PPm::G * ps[i].m * ps[j].m / r;
 			local_E_p += E_p;
 		}
-		local_P = local_P + ps[i].P;
-		local_L = local_L + ps[i].L;
+		local_Px += ps[i].P.x;
+        local_Py += ps[i].P.y;
+        local_Pz += ps[i].P.z;
+        local_Lx += ps[i].L.x;
+        local_Ly += ps[i].L.y;
+        local_Lz += ps[i].L.z;
 	}
+	vec local_P(local_Px, local_Py, local_Pz);
+    vec local_L(local_Lx, local_Ly, local_Lz);
 //обновление глобальных переменных
 #pragma omp critical
 	{
@@ -208,7 +212,7 @@ void calculate_conversation_laws_parallel(std::vector<PPm::Particle>& ps, int i_
 //рассчет центра масс
 vec calculate_centr_mass(std::vector<PPm::Particle>& ps, int i_0, int i_1)
 {
-	vec R(0, 0, 0);
+	vec R(0.0L, 0.0L, 0.0L);
 	for (int i = i_0; i < i_1; i++)
 	{
 		R = R + ps[i].r * ps[i].m;
@@ -221,16 +225,16 @@ void calculate_conversation_laws(std::vector<PPm::Particle>& ps, int i_0, int i_
 {
 	#pragma omp single
 	{
-		sistem_E_k = 0;
-		sistem_E_p = 0;
-		sistem_E = 0;
-		sistem_P = vec(0, 0, 0);
-		sistem_L = vec(0, 0, 0);
+		sistem_E_k = 0.0L;
+		sistem_E_p = 0.0L;
+		sistem_E = 0.0L;
+		sistem_P = vec(0.0L, 0.0L, 0.0L);
+		sistem_L = vec(0.0L, 0.0L, 0.0L);
 	}
 
 	for (int i = i_0; i < i_1; i++)
 	{
-		long double E_k = 0.5 * ps[i].m * ps[i].v.module_2();
+		long double E_k = 0.5L * ps[i].m * ps[i].v.module_2();
 
 		ps[i].P = ps[i].v * ps[i].m;					// set impulse
 		ps[i].L = ps[i].r * ps[i].P;					// set moment impulse
@@ -240,8 +244,8 @@ void calculate_conversation_laws(std::vector<PPm::Particle>& ps, int i_0, int i_
 		for (int j = i + 1; j < ps.size(); j++)
 		{
 			vec r_ij = ps[j].r - ps[i].r;
-			long double r = sqrt(r_ij.module_2() + PPm::r_c);
-			auto E_p = -PPm::G * ps[i].m * ps[j].m / r;//set potential energy
+			long double r = sqrtl(r_ij.module_2() + PPm::r_c);
+			long double E_p = -PPm::G * ps[i].m * ps[j].m / r;//set potential energy
 			sistem_E_p += E_p;
 		}
 		sistem_P = sistem_P + ps[i].P;
@@ -253,41 +257,72 @@ void calculate_conversation_laws(std::vector<PPm::Particle>& ps, int i_0, int i_
 //вычисление шага интегрирования (без ограничений, последовательно)
 //TODO: проверит на корректность работы
 void set_dynamic_step_parallel_temp(std::vector<PPm::Particle>& ps) {
-    if (ps.size() < 2) return;  // Недостаточно частиц для вычисления расстояний
+    if (ps.size() < 2) return;
 
+    // Экстремальные коэффициенты безопасности
+    constexpr long double SAFETY_DIST = 0.0001L;     // Частицы проходят <0.01% расстояния за шаг
+    constexpr long double SAFETY_ACCEL = 0.001L;     // Жёсткий контроль ускорений
+    constexpr long double MIN_VELOCITY = 1.0e-60L;   // Защита для экстремально малых скоростей
+    constexpr long double GRAVITY_FACTOR = 0.00001L; // Разрешение 0.001% орбитального периода
+    constexpr long double MAX_CHANGE_FACTOR = 10.0L; // Шаг растёт максимум на 1%
+    constexpr long double MIN_CHANGE_FACTOR = 0.1L; // Уменьшается максимум на 1%
+
+    // Инициализация с 128-битной точностью
     long double min_dist = std::numeric_limits<long double>::max();
-    long double max_a = 0.0;
+    long double max_a = 0.0L;
+    long double max_v = 0.0L;
+    long double min_orbital_period = std::numeric_limits<long double>::max();
+    long double min_freefall_time = std::numeric_limits<long double>::max();
 
-    // Находим минимальное расстояние и максимальное ускорение
-    #pragma omp parallel for reduction(min: min_dist) reduction(max: max_a)
+    #pragma omp parallel for reduction(min: min_dist, min_orbital_period, min_freefall_time) \
+                             reduction(max: max_a, max_v)
     for (int i = 0; i < ps.size(); i++) {
+        const long double mi = static_cast<long double>(ps[i].m);
+        const vec r_i = ps[i].r;
+        const vec v_i = ps[i].v;
+        
         for (int j = i + 1; j < ps.size(); j++) {
-            long double dist = (ps[i].r - ps[j].r).module();
-            if (dist < min_dist) min_dist = dist;
+            // Точное вычисление расстояния
+            const vec dr = r_i - ps[j].r;
+            const long double dist = dr.module();
+            min_dist = std::min(min_dist, dist);
+
+            // Орбитальный период по третьему закону Кеплера
+            const long double mu = static_cast<long double>(PPm::G) * (mi + static_cast<long double>(ps[j].m));
+            const long double period = 2.0L * M_PIl * sqrtl(dist*dist*dist / mu);
+            min_orbital_period = std::min(min_orbital_period, period);
+
+            // Время свободного падения (sqrt(r³/GM))
+            const long double t_ff = sqrtl(dist*dist*dist / mu);
+            min_freefall_time = std::min(min_freefall_time, t_ff);
         }
-        long double a = ps[i].a.module();
-        if (a > max_a) max_a = a;
+
+        // Максимальные ускорение и скорость
+        max_a = std::max(max_a, static_cast<long double>(ps[i].a.module()));
+        max_v = std::max(max_v, static_cast<long double>(ps[i].v.module()));
     }
 
-    // Вычисляем новый шаг на основе критериев:
-    // 1. Шаг должен быть достаточно мал, чтобы частицы не проскакивали друг друга (0.01 * min_dist)
-    // 2. Шаг должен учитывать ускорение (0.1 / sqrt(max_a)), чтобы сохранять точность
-    long double new_dt;
-    if (max_a == 0.0) {
-        new_dt = 0.0001 * min_dist;  // Если ускорений нет, ориентируемся только на расстояния
-    } else {
-        new_dt = std::min(0.0001 * min_dist, 0.001 / std::sqrt(max_a));
-    }
+    // Многоуровневые ультрапрецизионные критерии
+    const long double dt_dist = min_dist / (max_v + MIN_VELOCITY) * SAFETY_DIST;
+    const long double dt_accel = (max_a > 0.0L) ? SAFETY_ACCEL / sqrtl(max_a) : LDBL_MAX;
+    const long double dt_orbital = min_orbital_period * GRAVITY_FACTOR;
+    const long double dt_freefall = min_freefall_time * 0.0001L;
 
-    // Ограничиваем изменение шага: не более чем в 10 раз за один пересчёт
-    new_dt = std::clamp(new_dt, PPm::dt / 20.0, PPm::dt * 20.0);
+    // Выбираем самый строгий критерий
+    const long double new_dt = std::min({dt_dist, dt_accel, dt_orbital, dt_freefall});
 
-    // Гарантируем, что шаг не выйдет за глобальные границы [mindt, maxdt]
-    PPm::dt = std::clamp(new_dt, PPm::mindt, PPm::maxdt);
+    // Ультраплавная адаптация шага
+    constexpr long double ADAPT_SMOOTH = 0.05L; // Сильное сглаживание
+    long double adaptive_dt = ADAPT_SMOOTH * new_dt + (1.0L - ADAPT_SMOOTH) * static_cast<long double>(PPm::dt);
+
+    // Финальные ограничения
+    PPm::dt = std::clamp(adaptive_dt,
+                        std::max(static_cast<long double>(PPm::mindt), 1.0e-40L), // Абсолютный минимум
+                        std::min(static_cast<long double>(PPm::maxdt), min_orbital_period * 0.001L));
 }
 //вычисление шага интегрированая(ограничение - изменение не более чем в 2 раза за шаг, последовательно)
 //TODO: проверить на корректность работу
-void set_dinamic_step(std::vector<PPm::Particle>& ps)
+void set_dynamic_step(std::vector<PPm::Particle>& ps)
 {
 	long double min_dist = (ps[0].r - ps[1].r).module();
 	long double max_a = ps[0].a.module();
@@ -303,15 +338,15 @@ void set_dinamic_step(std::vector<PPm::Particle>& ps)
 		if (max_a < a)
 			max_a = a;
 	}
-	long double new_dt = std::min(0.01 * min_dist, 0.1 / sqrt(max_a));
-	new_dt = std::max(0.5 * PPm::dt, std::min(2.0 * PPm::dt, new_dt));
+	long double new_dt = std::min(0.001 * min_dist, 0.01 / sqrt(max_a));
+	new_dt = std::max(0.1 * PPm::dt, std::min(10 * PPm::dt, new_dt));
 	const long double min_dt = PPm::mindt;
 	const long double max_dt = PPm::maxdt;
 	PPm::dt = (std::max)(min_dt, (std::min)(new_dt, max_dt));
 }
 //вычисление шага интегрированая(ограничение - изменение не более чем в 10 раз за шаг, паралельно)
 //TODO: проверить на корректность работу
-void set_dinamic_step_parallel(std::vector<PPm::Particle>& ps)
+void set_dynamic_step_parallel(std::vector<PPm::Particle>& ps)
 {
 	long double min_dist = (ps[0].r - ps[1].r).module();
 	long double max_a = ps[0].a.module();
@@ -328,8 +363,8 @@ void set_dinamic_step_parallel(std::vector<PPm::Particle>& ps)
 		if (max_a < a)
 			max_a = a;
 	}
-	long double new_dt = (std::min)(0.01 * min_dist, 0.1 / sqrt(max_a));
-	new_dt = std::max(PPm::dt/10.0, std::min(10.0 * PPm::dt, new_dt));
+	long double new_dt = (std::min)(0.001L * min_dist, 0.01L / sqrt(max_a));
+	new_dt = std::max(PPm::dt/10.0L, std::min(10.0L* PPm::dt, new_dt));
 	const long double min_dt = PPm::mindt;
 	const long double max_dt = PPm::maxdt;
 	PPm::dt = (std::max)(min_dt, (std::min)(new_dt, max_dt));
@@ -392,10 +427,10 @@ void set_initial_circle(std::vector<PPm::Particle>& ps)
 		//====================================================
 	for (int i = 0; i < N; i++)
 	{
-		ps[i].r.x = R_max * cos(2 * PI / (N)*i);
-		ps[i].r.y = R_max * sin(2 * PI / (N)*i);
-		ps[i].r.z = 0;
-		ps[i].m = M / N;
+		ps[i].r.x = R_max * cosl(2.0L * PI / (N)*i);
+		ps[i].r.y = R_max * sinl(2.0L * PI / (N)*i);
+		ps[i].r.z = 0.0L;
+		ps[i].m = M /N;
 	}
 
 	calc_forces(ps, 0, ps.size());
@@ -407,13 +442,13 @@ void set_initial_circle(std::vector<PPm::Particle>& ps)
 	//==========================================================
 	for (auto& i : ps) {
 
-		long double v_asimutal = sqrt(i.r.module() * i.a.module());		// (cylindrical coordinates)
-		long double phi = atan2(i.r.y, i.r.x);
+		long double v_asimutal = sqrtl(i.r.module() * i.a.module());		// (cylindrical coordinates)
+		long double phi = atan2l(i.r.y, i.r.x);
 		long double r = i.r.module();
 
-		i.v.x = -r * v_asimutal * sin(phi);		// (kartesian coordinates)
-		i.v.y = r * v_asimutal * cos(phi);
-		i.v.z = 0;
+		i.v.x = -r * v_asimutal * sinl(phi);		// (kartesian coordinates)
+		i.v.y = r * v_asimutal * cosl(phi);
+		i.v.z = 0.0L;
 	}
 }
 

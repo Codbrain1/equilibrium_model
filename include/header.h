@@ -10,7 +10,7 @@
 #include <iomanip>
 #include<chrono>
 #include<omp.h>
-
+#include <cfloat>
 extern long double sistem_E;
 extern vec sistem_P;
 extern vec sistem_L;
@@ -43,9 +43,9 @@ void calculate_conversation_laws(std::vector<PPm::Particle>& ps, int i_0, int i_
 
 void set_dynamic_step_parallel_temp(std::vector<PPm::Particle>& ps);
 
-void set_dinamic_step(std::vector<PPm::Particle>& ps);
+void set_dynamic_step(std::vector<PPm::Particle>& ps);
 
-void set_dinamic_step_parallel(std::vector<PPm::Particle>& ps);
+void set_dynamic_step_parallel(std::vector<PPm::Particle>& ps);
 
 void set_exponential_disk(std::vector<PPm::Particle>& ps, int i_0, int i_1, long double _x_, long double _y_);
 

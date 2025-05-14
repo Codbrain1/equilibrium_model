@@ -598,9 +598,9 @@ def visual_centr_mass_on_sistem():
         print(f"График сохранен: {output_path}")
         
 if __name__ == "__main__":
-    #visual_conversation_laws()
-   #visual_traectories()
+    visual_conversation_laws()
+    visual_traectories()
     visual_dependens_dt_time()
-    #visual_centr_mass_on_sistem()
-    #visual_centr_mass()
-    print_to_traectories_cadrs()
+    visual_centr_mass_on_sistem()
+    visual_centr_mass()
+    #print_to_traectories_cadrs()

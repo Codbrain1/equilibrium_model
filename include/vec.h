@@ -4,7 +4,7 @@ class vec
 {
 public:
 	long double x, y, z;
-	vec() noexcept : x(0),y(0),z(0) {}
+	vec() noexcept : x(0.0L),y(0.0L),z(0.0L) {}
 
 	vec(long double _x, long double _y, long double _z) noexcept: x(_x),y(_y),z(_z) {}
 	
@@ -34,7 +34,7 @@ public:
 	friend vec operator*(long double scalar, const vec& v) {
 		return vec(scalar * v.x, scalar * v.y, scalar * v.z);
 	}
-	inline long double module()const { return sqrt(x * x + y * y + z * z); }
+	inline long double module()const { return sqrtl(x * x + y * y + z * z); }
 
 	inline long double module_2() const noexcept { return x * x + y * y + z * z; }
 
