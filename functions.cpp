@@ -259,42 +259,37 @@ void calculate_conversation_laws(std::vector<PPm::Particle>& ps, int i_0, int i_
 void set_dynamic_step_parallel_temp(std::vector<PPm::Particle>& ps) {
     if (ps.size() < 2) return;
 
-    // Экстремальные коэффициенты безопасности
-    constexpr long double SAFETY_DIST = 0.0001L;     // Частицы проходят <0.01% расстояния за шаг
-    constexpr long double SAFETY_ACCEL = 0.001L;     // Жёсткий контроль ускорений
-    constexpr long double MIN_VELOCITY = 1.0e-60L;   // Защита для экстремально малых скоростей
-    constexpr long double GRAVITY_FACTOR = 0.00001L; // Разрешение 0.001% орбитального периода
-    constexpr long double MAX_CHANGE_FACTOR = 10.0L; // Шаг растёт максимум на 1%
-    constexpr long double MIN_CHANGE_FACTOR = 0.1L; // Уменьшается максимум на 1%
-
-    // Инициализация с 128-битной точностью
+    // Параметры системы
+    constexpr long double r_soft = 0.05L;  // Радиус гравитационного обрезания
+    constexpr long double SAFETY_DIST = 0.001L;
+    constexpr long double SAFETY_ACCEL = 0.005L;
+    constexpr long double MIN_VELOCITY = 1.0e-50L;
+    constexpr long double GRAVITY_FACTOR = 0.0001L;
+    constexpr long double MAX_CHANGE_FACTOR = 2.0L;
+    constexpr long double MIN_CHANGE_FACTOR = 0.5L;
+	constexpr long double ADAPT_SMOOTH = 0.3L;
+	
+    // Инициализация
     long double min_dist = std::numeric_limits<long double>::max();
     long double max_a = 0.0L;
     long double max_v = 0.0L;
     long double min_orbital_period = std::numeric_limits<long double>::max();
-    long double min_freefall_time = std::numeric_limits<long double>::max();
-
-    #pragma omp parallel for reduction(min: min_dist, min_orbital_period, min_freefall_time) \
+    #pragma omp parallel for reduction(min: min_dist, min_orbital_period) \
                              reduction(max: max_a, max_v)
     for (int i = 0; i < ps.size(); i++) {
         const long double mi = static_cast<long double>(ps[i].m);
         const vec r_i = ps[i].r;
-        const vec v_i = ps[i].v;
         
         for (int j = i + 1; j < ps.size(); j++) {
-            // Точное вычисление расстояния
+            // Расстояние с учётом мягкого радиуса
             const vec dr = r_i - ps[j].r;
-            const long double dist = dr.module();
+            const long double dist = std::max(dr.module(), r_soft);
             min_dist = std::min(min_dist, dist);
 
-            // Орбитальный период по третьему закону Кеплера
+            // Орбитальный период с поправкой на мягкий радиус
             const long double mu = static_cast<long double>(PPm::G) * (mi + static_cast<long double>(ps[j].m));
             const long double period = 2.0L * M_PIl * sqrtl(dist*dist*dist / mu);
             min_orbital_period = std::min(min_orbital_period, period);
-
-            // Время свободного падения (sqrt(r³/GM))
-            const long double t_ff = sqrtl(dist*dist*dist / mu);
-            min_freefall_time = std::min(min_freefall_time, t_ff);
         }
 
         // Максимальные ускорение и скорость
@@ -302,23 +297,30 @@ void set_dynamic_step_parallel_temp(std::vector<PPm::Particle>& ps) {
         max_v = std::max(max_v, static_cast<long double>(ps[i].v.module()));
     }
 
-    // Многоуровневые ультрапрецизионные критерии
+    // Критерии с учётом обрезания
     const long double dt_dist = min_dist / (max_v + MIN_VELOCITY) * SAFETY_DIST;
-    const long double dt_accel = (max_a > 0.0L) ? SAFETY_ACCEL / sqrtl(max_a) : LDBL_MAX;
+    
+    // Максимальное возможное ускорение из-за обрезания
+    const long double max_effective_a = PPm::G * ps[0].m * ps.size() / (r_soft * r_soft);
+    const long double dt_accel = (max_a > 0.0L) 
+                               ? SAFETY_ACCEL / sqrtl(std::min(max_a, max_effective_a)) 
+                               : LDBL_MAX;
+
     const long double dt_orbital = min_orbital_period * GRAVITY_FACTOR;
-    const long double dt_freefall = min_freefall_time * 0.0001L;
 
-    // Выбираем самый строгий критерий
-    const long double new_dt = std::min({dt_dist, dt_accel, dt_orbital, dt_freefall});
+    // Выбираем минимальный шаг (исключаем dt_freefall, так как он учтён в dt_accel)
+    const long double new_dt = std::min({dt_dist, dt_accel, dt_orbital});
 
-    // Ультраплавная адаптация шага
-    constexpr long double ADAPT_SMOOTH = 0.05L; // Сильное сглаживание
-    long double adaptive_dt = ADAPT_SMOOTH * new_dt + (1.0L - ADAPT_SMOOTH) * static_cast<long double>(PPm::dt);
+    // Плавная адаптация
+ 
+    long double adaptive_dt = ADAPT_SMOOTH * new_dt + 
+                            (1.0L - ADAPT_SMOOTH) * static_cast<long double>(PPm::dt);
 
     // Финальные ограничения
     PPm::dt = std::clamp(adaptive_dt,
-                        std::max(static_cast<long double>(PPm::mindt), 1.0e-40L), // Абсолютный минимум
-                        std::min(static_cast<long double>(PPm::maxdt), min_orbital_period * 0.001L));
+                        std::max(static_cast<long double>(PPm::mindt), 1.0e-30L),
+                        std::min(static_cast<long double>(PPm::maxdt), 
+                                min_orbital_period * 0.001L));
 }
 //вычисление шага интегрированая(ограничение - изменение не более чем в 2 раза за шаг, последовательно)
 //TODO: проверить на корректность работу
@@ -373,42 +375,42 @@ void set_dynamic_step_parallel(std::vector<PPm::Particle>& ps)
 void set_exponential_disk(std::vector<PPm::Particle>& ps, int i_0, int i_1, long double _x_, long double _y_)
 {
 	using namespace Particle_Particle_model;
-	std::mt19937 gen(42);
-	std::uniform_real_distribution<long double> angle_dist(0, 2 * PI);
-	const long double r_core = 0.05 * r_alpha; // ядро смягчения потенциала
+	std::mt19937 gen(42.0L);
+	std::uniform_real_distribution<long double> angle_dist(0.0L, 2.0L * PI);
+	const long double r_core = 0.05L * r_alpha; // ядро смягчения потенциала
 	int _N = i_1 - i_0;
 	// Экспонциальное распределение с ядром
 	for (int i = i_0; i < i_1; ++i) {
-		long double u = (i - i_0 + 0.5) / _N;
-		long double r = -r_alpha * log(1 - u);
+		long double u = (i - i_0 + 0.5L) / _N;
+		long double r = -r_alpha * logl(1.0L - u);
 
 		// Плавный переход в центре
-		long double r_eff = sqrt(r * r + r_core * r_core);
+		long double r_eff = sqrtl(r * r + r_core * r_core);
 		long double theta = angle_dist(gen);
 
 		// Кривая вращения с поправкой на ядро
-		long double v_circ = sqrt(M * pow(r_eff, 3) / pow(r_eff + r_alpha, 3));
+		long double v_circ = sqrtl(M * powl(r_eff, 3.0L) / powl(r_eff + r_alpha, 3.0L));
 
 		// Положение частицы
-		ps[i].r.x = r * cos(theta) + _x_;
-		ps[i].r.y = r * sin(theta) + _y_;
-		ps[i].r.z = 0;
+		ps[i].r.x = r * cosl(theta) + _x_;
+		ps[i].r.y = r * sinl(theta) + _y_;
+		ps[i].r.z = 0.0L;
 
 		// Чисто круговая скорость (тангенциальная)
-		ps[i].v.x = -v_circ * sin(theta);  // v_φ = -v_circ * sin(θ)
-		ps[i].v.y = v_circ * cos(theta);   // v_φ = v_circ * cos(θ)
-		ps[i].v.z = 0;
+		ps[i].v.x = -v_circ * sinl(theta);  // v_φ = -v_circ * sin(θ)
+		ps[i].v.y = v_circ * cosl(theta);   // v_φ = v_circ * cos(θ)
+		ps[i].v.z = 0.0L;
 
 		// Добавляем случайные компоненты (радиальную и тангенциальную)
-		std::normal_distribution<long double> rad_vel(0, 0.2 * v_circ);
-		std::normal_distribution<long double> tang_vel(0, 0.1 * v_circ);
+		std::normal_distribution<long double> rad_vel(0.0L, 0.2L * v_circ);
+		std::normal_distribution<long double> tang_vel(0.0L, 0.1L * v_circ);
 
 		long double v_rad = rad_vel(gen);
 		long double v_tang = tang_vel(gen);
 
 		// Преобразование случайных компонент в декартовы координаты
-		ps[i].v.x += v_rad * cos(theta) - v_tang * sin(theta);
-		ps[i].v.y += v_rad * sin(theta) + v_tang * cos(theta);
+		ps[i].v.x += v_rad * cosl(theta) - v_tang * sinl(theta);
+		ps[i].v.y += v_rad * sinl(theta) + v_tang * cosl(theta);
 
 		ps[i].m = M / N;
 	}

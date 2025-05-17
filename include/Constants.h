@@ -4,11 +4,11 @@ namespace Particle_Particle_model {
 	//======================================================================
 	//const long double G = 6.67 * 10e-11;
 	const long double G = 1.0L;
-	const long double r_c = 0.05*0.0L; // в данном случае используется r_c*r_c
-	const long double PI = 3.141592653589793L;
+	const long double r_c = 0.05L*0.05L; // в данном случае используется r_c*r_c
+	const long double PI = 3.1415926535897932384626433832795L;
 	//initial conditions:
 	//======================================================================
-	const int N = 3; //число частиц
+	const int N = 512; //число частиц
 	const long double t_0 = 0.0L, t_1 = 1000.0L; //начальное и конеченое врем
 	inline int div = 1; //отвечает за частоту записи данных в файл 1=каждая итерация
 	inline long double dt = 0.001L; //шаг времени

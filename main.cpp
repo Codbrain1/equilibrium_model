@@ -18,9 +18,8 @@ int main()
 	//==========================================================
 
 
-	//set_exponential_disk(particles,0,PPm::N/2,-1,0);
+	set_exponential_disk(particles,0,PPm::N,0,0);
 	//set_exponential_disk(particles,PPm::N/2,PPm::N,1,0);
-	set_initial_circle(particles);
 	std::cout << "set initial conditions\n";
 
 	calculate_conversation_laws(particles, 0, particles.size());
@@ -96,7 +95,7 @@ int main()
 		}
 		else if (PPm::dt < 1e-4L)
 		{
-			PPm::div = 1000;
+			PPm::div = 100;
 		}
 		else if (PPm::dt < 1e-3L)
 		{
