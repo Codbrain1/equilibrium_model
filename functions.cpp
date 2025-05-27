@@ -326,25 +326,65 @@ void set_dynamic_step_parallel_temp(std::vector<PPm::Particle>& ps) {
 //TODO: проверить на корректность работу
 void set_dynamic_step(std::vector<PPm::Particle>& ps)
 {
-	long double min_dist = (ps[0].r - ps[1].r).module();
-	long double max_a = ps[0].a.module();
-	for (int i = 0; i < ps.size(); i++)
-	{
-		for (int j = i + 1; j < ps.size(); j++)
-		{
-			long double dist = (ps[i].r - ps[j].r).module();
-			if (dist < min_dist)
-				min_dist = dist;
+		if (ps.size() < 2) return;
+	
+		// Параметры системы
+		const long double r_soft = 0;  // Радиус гравитационного обрезания
+		constexpr long double SAFETY_DIST = 0.0001L;
+		constexpr long double SAFETY_ACCEL = 0.0005L;
+		constexpr long double MIN_VELOCITY = 1.0e-50L;
+		constexpr long double GRAVITY_FACTOR = 0.00001L;
+		constexpr long double MAX_CHANGE_FACTOR = 2.0L;
+		constexpr long double MIN_CHANGE_FACTOR = 0.5L;
+		constexpr long double ADAPT_SMOOTH = 0.3L;
+		
+		// Инициализация
+		long double min_dist = std::numeric_limits<long double>::max();
+		long double max_a = 0.0L;
+		long double max_v = 0.0L;
+		long double min_orbital_period = std::numeric_limits<long double>::max();
+	
+		for (int i = 0; i < ps.size(); i++) {
+			const long double mi = static_cast<long double>(ps[i].m);
+			const vec r_i = ps[i].r;
+			
+			for (int j = i + 1; j < ps.size(); j++) {
+				// Расстояние с учётом мягкого радиуса
+				const vec dr = r_i - ps[j].r;
+				const long double dist = std::max(dr.module(), r_soft);
+				min_dist = std::min(min_dist, dist);
+	
+				// Орбитальный период с поправкой на мягкий радиус
+				const long double mu = static_cast<long double>(PPm::G) * (mi + static_cast<long double>(ps[j].m));
+				const long double period = 2.0L * M_PIl * sqrtl(dist*dist*dist / mu);
+				min_orbital_period = std::min(min_orbital_period, period);
+			}
+	
+			// Максимальные ускорение и скорость
+			max_a = std::max(max_a, static_cast<long double>(ps[i].a.module()));
+			max_v = std::max(max_v, static_cast<long double>(ps[i].v.module()));
 		}
-		long double a = ps[i].a.module();
-		if (max_a < a)
-			max_a = a;
-	}
-	long double new_dt = std::min(0.001 * min_dist, 0.01 / sqrt(max_a));
-	new_dt = std::max(0.1 * PPm::dt, std::min(10 * PPm::dt, new_dt));
-	const long double min_dt = PPm::mindt;
-	const long double max_dt = PPm::maxdt;
-	PPm::dt = (std::max)(min_dt, (std::min)(new_dt, max_dt));
+	
+		// Критерии с учётом обрезания
+		const long double dt_dist = min_dist / (max_v + MIN_VELOCITY) * SAFETY_DIST;
+		
+		// Максимальное возможное ускорение из-за обрезания
+		const long double max_effective_a = PPm::G * ps[0].m * ps.size() / (r_soft * r_soft);
+		const long double dt_accel = (max_a > 0.0L) ? SAFETY_ACCEL / sqrtl(std::min(max_a, max_effective_a)) : LDBL_MAX;
+	
+		const long double dt_orbital = min_orbital_period * GRAVITY_FACTOR;
+	
+		// Выбираем минимальный шаг (исключаем dt_freefall, так как он учтён в dt_accel)
+		const long double new_dt = std::min({dt_dist, dt_accel, dt_orbital});
+	
+		// Плавная адаптация
+		long double adaptive_dt = ADAPT_SMOOTH * new_dt + 
+								(1.0L - ADAPT_SMOOTH) * static_cast<long double>(PPm::dt);
+	
+		// Финальные ограничения
+		PPm::dt = std::clamp(adaptive_dt,std::max(static_cast<long double>(PPm::mindt), 1.0e-30L),
+							std::min(static_cast<long double>(PPm::maxdt), 
+									min_orbital_period * 0.001L));
 }
 //вычисление шага интегрированая(ограничение - изменение не более чем в 10 раз за шаг, паралельно)
 //TODO: проверить на корректность работу
