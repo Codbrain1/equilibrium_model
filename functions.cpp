@@ -429,7 +429,7 @@ void set_exponential_disk(std::vector<PPm::Particle>& ps, int i_0, int i_1, long
 		long double theta = angle_dist(gen);
 
 		// Кривая вращения с поправкой на ядро
-		long double v_circ = sqrtl(M * r*powl(r_eff, 2.0L) / powl(r_eff + r_alpha, 3.0L));
+		long double v_circ = sqrtl(G * M * powl(r, 2.0L) / powl(r_eff, 3.0L));
 
 		// Положение частицы
 		ps[i].r.x = r * cosl(theta) + _x_;
